@@ -1,476 +1,142 @@
+"use client"
+
 import React from "react"
 import { Button } from "@/components/ui/button"
-import { FileText, Sparkles, BookOpen } from "lucide-react"
+import { FileText, Sparkles, BookOpen, Zap, ArrowRight, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
+import { motion } from "framer-motion"
 
 export function HeroSection() {
   return (
-    <section
-      className="flex flex-col items-center text-center relative mx-auto rounded-2xl overflow-hidden my-0 md:my-6 py-0 px-4
-         w-full max-w-full h-screen md:h-[600px] lg:h-[810px] md:max-w-[1220px] md:px-0"
-    >
-      {/* SVG Background */}
-      <div className="absolute inset-0 z-[1]">
-        <svg
-          width="100%"
-          height="100%"
-          viewBox="0 0 1220 810"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="xMidYMid slice"
-        >
-          <g clipPath="url(#clip0_186_1134)">
-            <mask
-              id="mask0_186_1134"
-              style={{ maskType: "alpha" }}
-              maskUnits="userSpaceOnUse"
-              x="10"
-              y="-1"
-              width="1200"
-              height="812"
-            >
-              <rect x="10" y="-0.84668" width="1200" height="811.693" fill="url(#paint0_linear_186_1134)" />
-            </mask>
-            <g mask="url(#mask0_186_1134)">
-              {/* Grid Rectangles */}
-              {[...Array(35)].map((_, i) => (
-                <React.Fragment key={`row1-${i}`}>
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="9.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="45.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="81.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="117.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="153.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="189.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="225.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="261.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="297.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="333.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="369.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="405.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="441.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="477.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="513.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="549.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="585.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="621.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="657.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="693.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="729.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                  <rect
-                    x={-20.0891 + i * 36}
-                    y="765.2"
-                    width="35.6"
-                    height="35.6"
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.2"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 2"
-                  />
-                </React.Fragment>
-              ))}
-              {/* Specific Rectangles with fill */}
-              <rect x="699.711" y="81" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.08" />
-              <rect x="195.711" y="153" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="1023.71" y="153" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="123.711" y="225" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="1095.71" y="225" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="951.711" y="297" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="231.711" y="333" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.07" />
-              <rect x="303.711" y="405" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.07" />
-              <rect x="87.7109" y="405" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="519.711" y="405" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.08" />
-              <rect x="771.711" y="405" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="591.711" y="477" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.07" />
-            </g>
-
-            <g filter="url(#filter0_f_186_1134)">
-              <path
-                d="M1447.45 -87.0203V-149.03H1770V1248.85H466.158V894.269C1008.11 894.269 1447.45 454.931 1447.45 -87.0203Z"
-                fill="url(#paint1_linear_186_1134)"
-              />
-            </g>
-
-            <g filter="url(#filter1_f_186_1134)">
-              <path
-                d="M1383.45 -151.02V-213.03H1706V1184.85H402.158V830.269C944.109 830.269 1383.45 390.931 1383.45 -151.02Z"
-                fill="url(#paint2_linear_186_1134)"
-                fillOpacity="0.69"
-              />
-            </g>
-
-            <g style={{ mixBlendMode: "lighten" }} filter="url(#filter2_f_186_1134)">
-              <path
-                d="M1567.45 -231.02V-293.03H1890V1104.85H586.158V750.269C1128.11 750.269 1567.45 310.931 1567.45 -231.02Z"
-                fill="url(#paint3_linear_186_1134)"
-              />
-            </g>
-
-            <g style={{ mixBlendMode: "overlay" }} filter="url(#filter3_f_186_1134)">
-              <path
-                d="M65.625 750.269H284.007C860.205 750.269 1327.31 283.168 1327.31 -293.03H1650V1104.85H65.625V750.269Z"
-                fill="url(#paint4_radial_186_1134)"
-                fillOpacity="0.64"
-              />
-            </g>
-          </g>
-
-          <rect
-            x="0.5"
-            y="0.5"
-            width="1219"
-            height="809"
-            rx="15.5"
-            stroke="hsl(var(--foreground))"
-            strokeOpacity="0.06"
-          />
-
-          <defs>
-            <filter
-              id="filter0_f_186_1134"
-              x="147.369"
-              y="-467.818"
-              width="1941.42"
-              height="2035.46"
-              filterUnits="userSpaceOnUse"
-              colorInterpolationFilters="sRGB"
-            >
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-              <feGaussianBlur stdDeviation="159.394" result="effect1_foregroundBlur_186_1134" />
-            </filter>
-            <filter
-              id="filter1_f_186_1134"
-              x="-554.207"
-              y="-1169.39"
-              width="3216.57"
-              height="3310.61"
-              filterUnits="userSpaceOnUse"
-              colorInterpolationFilters="sRGB"
-            >
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-              <feGaussianBlur stdDeviation="478.182" result="effect1_foregroundBlur_186_1134" />
-            </filter>
-            <filter
-              id="filter2_f_186_1134"
-              x="426.762"
-              y="-452.424"
-              width="1622.63"
-              height="1716.67"
-              filterUnits="userSpaceOnUse"
-              colorInterpolationFilters="sRGB"
-            >
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-              <feGaussianBlur stdDeviation="79.6969" result="effect1_foregroundBlur_186_1134" />
-            </filter>
-            <filter
-              id="filter3_f_186_1134"
-              x="-253.163"
-              y="-611.818"
-              width="2221.95"
-              height="2035.46"
-              filterUnits="userSpaceOnUse"
-              colorInterpolationFilters="sRGB"
-            >
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-              <feGaussianBlur stdDeviation="159.394" result="effect1_foregroundBlur_186_1134" />
-            </filter>
-            <linearGradient
-              id="paint0_linear_186_1134"
-              x1="35.0676"
-              y1="23.6807"
-              x2="903.8"
-              y2="632.086"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop stopColor="hsl(var(--foreground))" stopOpacity="0.3" />
-              <stop offset="1" stopColor="hsl(var(--foreground))" stopOpacity="0.5" />
-            </linearGradient>
-            <linearGradient
-              id="paint1_linear_186_1134"
-              x1="1118.08"
-              y1="-149.03"
-              x2="1118.08"
-              y2="1248.85"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop stopColor="hsl(var(--foreground))" />
-              <stop offset="0.578125" stopColor="hsl(var(--primary-light))" />
-              <stop offset="1" stopColor="hsl(var(--primary))" />
-            </linearGradient>
-            <linearGradient
-              id="paint2_linear_186_1134"
-              x1="1054.08"
-              y1="-213.03"
-              x2="1054.08"
-              y2="1184.85"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop stopColor="hsl(var(--foreground))" />
-              <stop offset="0.578125" stopColor="hsl(var(--primary-light))" />
-              <stop offset="1" stopColor="hsl(var(--primary))" />
-            </linearGradient>
-            <linearGradient
-              id="paint3_linear_186_1134"
-              x1="1238.08"
-              y1="-293.03"
-              x2="1238.08"
-              y2="1104.85"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop stopColor="hsl(var(--foreground))" />
-              <stop offset="0.578125" stopColor="hsl(var(--primary-light))" />
-              <stop offset="1" stopColor="hsl(var(--primary))" />
-            </linearGradient>
-            <radialGradient
-              id="paint4_radial_186_1134"
-              cx="0"
-              cy="0"
-              r="1"
-              gradientUnits="userSpaceOnUse"
-              gradientTransform="translate(989.13 557.24) rotate(47.9516) scale(466.313 471.424)"
-            >
-              <stop stopColor="hsl(var(--foreground))" />
-              <stop offset="0.157789" stopColor="hsl(var(--primary-light))" />
-              <stop offset="1" stopColor="hsl(var(--primary))" />
-            </radialGradient>
-            <clipPath id="clip0_186_1134">
-              <rect width="1220" height="810" rx="16" fill="hsl(var(--foreground))" />
-            </clipPath>
-          </defs>
-        </svg>
+    <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-32 md:pt-32 md:pb-40">
+      {/* Animated Gradient Background */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/5" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+        
+        {/* Grid Pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+          style={{
+            backgroundImage: `linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px),
+                              linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)`,
+            backgroundSize: "50px 50px"
+          }}
+        />
       </div>
 
-      <div className="relative z-40 flex flex-col items-center justify-center h-full w-full px-2 sm:px-4 py-8 md:py-12 lg:py-16">
-        <div className="space-y-3 md:space-y-4 lg:space-y-6 w-full max-w-[90%] sm:max-w-md md:max-w-[500px] lg:max-w-[588px]">
-          <h2 className="text-foreground text-xl sm:text-2xl md:text-3xl lg:text-5xl font-semibold leading-tight text-center">
-            Transform Documents into Study Materials
-          </h2>
-          <p className="text-muted-foreground text-sm sm:text-base md:text-base lg:text-lg font-medium leading-relaxed max-w-full sm:max-w-lg mx-auto text-center">
-            Upload PDFs, DOCX, or EPUB files and instantly generate AI-powered summaries, flashcards, practice questions, and explanations to supercharge your learning.
-          </p>
-        </div>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div className="flex flex-col items-center text-center space-y-8 md:space-y-12">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>AI-Powered Study Platform</span>
+          </motion.div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-[90%] sm:max-w-md md:max-w-[500px] mt-4 md:mt-6 lg:mt-8">
-          <Link href="/auth/sign-up" className="w-full sm:w-auto">
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-medium text-sm sm:text-base shadow-lg ring-1 ring-primary/20">
-              Get Started Free
-            </Button>
-          </Link>
-          <Link href="/auth/login" className="w-full sm:w-auto">
-            <Button variant="outline" className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-medium text-sm sm:text-base">
-              Sign In
-            </Button>
-          </Link>
-        </div>
+          {/* Main Heading */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="space-y-4 md:space-y-6 max-w-4xl"
+          >
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
+              <span className="bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
+                Transform Documents into
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-primary via-primary to-primary/80 bg-clip-text text-transparent">
+                Study Materials
+              </span>
+            </h1>
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Upload PDFs, DOCX, or EPUB files and instantly generate AI-powered summaries, flashcards, practice questions, and explanations to supercharge your learning.
+            </p>
+          </motion.div>
 
-        {/* Feature Icons */}
-        <div className="mt-6 sm:mt-8 md:mt-10 lg:mt-12 flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-8 text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span className="text-xs sm:text-sm font-medium">PDF, DOCX, EPUB</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span className="text-xs sm:text-sm font-medium">AI-Powered</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span className="text-xs sm:text-sm font-medium">Study Tools</span>
-          </div>
-        </div>
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto"
+          >
+            <Link href="/auth/sign-up" className="w-full sm:w-auto">
+              <Button 
+                size="lg" 
+                className="w-full sm:w-auto px-8 py-6 text-base md:text-lg font-semibold rounded-full bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-200 group"
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Link href="/auth/login" className="w-full sm:w-auto">
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="w-full sm:w-auto px-8 py-6 text-base md:text-lg font-semibold rounded-full border-2 hover:bg-accent transition-all duration-200"
+              >
+                Sign In
+              </Button>
+            </Link>
+          </motion.div>
+
+          {/* Feature Pills */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="flex flex-wrap items-center justify-center gap-3 md:gap-4 pt-4"
+          >
+            {[
+              { icon: FileText, text: "PDF, DOCX, EPUB" },
+              { icon: Sparkles, text: "AI-Powered" },
+              { icon: BookOpen, text: "Study Tools" },
+              { icon: Zap, text: "Instant Generation" }
+            ].map((feature, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border/50 backdrop-blur-sm hover:bg-muted transition-colors"
+              >
+                <feature.icon className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">{feature.text}</span>
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Key Benefits */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 pt-8 max-w-3xl w-full"
+          >
+            {[
+              "Generate summaries in seconds",
+              "Create interactive flashcards",
+              "Practice with AI questions"
+            ].map((benefit, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-2 p-4 rounded-lg bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card transition-colors"
+              >
+                <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                <span className="text-sm font-medium text-foreground">{benefit}</span>
       </div>
+            ))}
+          </motion.div>
+      </div>
+      </div>
+
+      {/* Decorative Elements */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl -z-10 hidden lg:block" />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10 hidden lg:block" />
     </section>
   )
 }

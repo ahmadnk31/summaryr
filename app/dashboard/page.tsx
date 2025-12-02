@@ -2,8 +2,8 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { DocumentUpload } from "@/components/document-upload"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, BookOpen, StickyNote } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { FileText, BookOpen, StickyNote, ArrowRight, TrendingUp, Clock, User, FileQuestion, Sparkles } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from 'next'
@@ -66,61 +66,134 @@ export default async function DashboardPage() {
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id)
 
+  const { count: summaryCount } = await supabase
+    .from("summaries")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
+
+  const { count: questionCount } = await supabase
+    .from("questions")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
+
+  // Get user's full name
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single()
+
+  const userName = profile?.full_name || user.email?.split("@")[0] || "User"
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Image src="/logo.svg" alt="Summaryr Logo" width={24} height={24} className="h-6 w-6" />
-            <h1 className="text-xl font-semibold">Summaryr</h1>
+          <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Image src="/logo.png" alt="Summaryr Logo" width={28} height={28} className="h-7 w-7" />
+            <h1 className="text-xl font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Summaryr
+            </h1>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/documents">
+              <Button variant="ghost" size="sm">
+                <FileText className="h-4 w-4 mr-2" />
+                Documents
+              </Button>
+            </Link>
+            <form action="/auth/signout" method="post">
+              <Button variant="ghost" type="submit" size="sm">
+                Sign Out
+              </Button>
+            </form>
           </div>
-          <form action="/auth/signout" method="post">
-            <Button variant="ghost" type="submit">
-              Sign Out
-            </Button>
-          </form>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Welcome back!</h2>
-          <p className="text-muted-foreground">Upload documents and create study materials with AI</p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+              <User className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold">Welcome back, {userName}!</h2>
+              <p className="text-muted-foreground mt-1">Upload documents and create study materials with AI</p>
+            </div>
+          </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors group">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">Documents</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+              <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">{documentCount || 0}</div>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href="/documents">View All</Link>
+            <CardContent className="relative z-10">
+              <div className="flex items-end justify-between">
+                <div>
+                  <div className="text-3xl font-bold mb-1">{documentCount || 0}</div>
+                  <p className="text-xs text-muted-foreground">Total documents</p>
+                </div>
+                <Button variant="ghost" size="sm" asChild className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Link href="/documents">
+                    View All
+                    <ArrowRight className="h-3 w-3 ml-1" />
+                  </Link>
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors group">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">Flashcards</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
+              <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
+                <BookOpen className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{flashcardCount || 0}</div>
+            <CardContent className="relative z-10">
+              <div>
+                <div className="text-3xl font-bold mb-1">{flashcardCount || 0}</div>
+                <p className="text-xs text-muted-foreground">Study cards created</p>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors group">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">Notes</CardTitle>
-              <StickyNote className="h-4 w-4 text-muted-foreground" />
+              <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center group-hover:bg-green-500/20 transition-colors">
+                <StickyNote className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{noteCount || 0}</div>
+            <CardContent className="relative z-10">
+              <div>
+                <div className="text-3xl font-bold mb-1">{noteCount || 0}</div>
+                <p className="text-xs text-muted-foreground">Personal notes</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors group">
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
+              <CardTitle className="text-sm font-medium">Summaries</CardTitle>
+              <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
+                <Sparkles className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              </div>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <div>
+                <div className="text-3xl font-bold mb-1">{summaryCount || 0}</div>
+                <p className="text-xs text-muted-foreground">AI summaries</p>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -128,38 +201,63 @@ export default async function DashboardPage() {
         <div className="grid gap-6 lg:grid-cols-2">
           <DocumentUpload />
 
-          <Card>
+          <Card className="h-full">
             <CardHeader>
               <div className="flex items-center justify-between">
-              <CardTitle>Recent Documents</CardTitle>
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    Recent Documents
+                  </CardTitle>
+                  <CardDescription className="mt-1">
+                    Your latest uploaded documents
+                  </CardDescription>
+                </div>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href="/documents">View All</Link>
+                  <Link href="/documents" className="flex items-center gap-1">
+                    View All
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               {documents && documents.length > 0 ? (
                 <div className="space-y-2">
-                  {documents.map((doc) => (
+                  {documents.map((doc, index) => (
                     <Link
                       key={doc.id}
                       href={`/documents/${doc.id}`}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-lg border border-border/50 hover:border-primary/50 hover:bg-accent/50 transition-all group"
                     >
-                      <FileText className="h-5 w-5 text-muted-foreground" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{doc.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {doc.file_type.toUpperCase()} • {new Date(doc.upload_date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-                        </p>
+                      <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center group-hover:from-primary/20 group-hover:to-primary/10 transition-colors">
+                        <FileText className="h-5 w-5 text-primary" />
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate group-hover:text-primary transition-colors">{doc.title}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                            {doc.file_type.toUpperCase()}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(doc.upload_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                          </span>
+                        </div>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                     </Link>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  No documents yet. Upload your first document to get started!
-                </p>
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <FileText className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground mb-1">No documents yet</p>
+                  <p className="text-xs text-muted-foreground">
+                    Upload your first document to get started!
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>
