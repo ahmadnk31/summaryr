@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { Resend } from "resend"
 import { render } from "@react-email/render"
 import { VerificationEmail } from "@/emails/verification-email"
+import { getBaseUrl } from "@/lib/url"
 import crypto from "crypto"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -123,9 +124,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate verification URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-                    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-                    "http://localhost:3000"
+    const baseUrl = getBaseUrl()
     const verificationUrl = `${baseUrl}/auth/verify-email?token=${token}`
 
     // Render email template

@@ -7,6 +7,7 @@ import {
   Text,
   Heading,
   Link,
+  Button,
 } from "@react-email/components"
 
 interface VerificationEmailProps {
@@ -28,17 +29,19 @@ export function VerificationEmail({ name, verificationUrl }: VerificationEmailPr
             </Text>
           </Section>
           <Section style={buttonSection}>
-            <Link href={verificationUrl} style={button}>
+            <Button href={verificationUrl} style={button}>
               Verify Email Address
-            </Link>
+            </Button>
           </Section>
           <Section style={section}>
             <Text style={smallText}>
               Or copy and paste this link into your browser:
             </Text>
-            <Link href={verificationUrl} style={linkText}>
-              {verificationUrl}
-            </Link>
+            <Text style={linkText}>
+              <Link href={verificationUrl} style={linkStyle}>
+                {verificationUrl}
+              </Link>
+            </Text>
             <Text style={smallText}>
               This link will expire in 24 hours. If you didn't create an account, you can safely ignore this email.
             </Text>
@@ -92,13 +95,16 @@ const smallText = {
 }
 
 const linkText = {
-  color: "#0070f3",
   fontSize: "12px",
   lineHeight: "18px",
   margin: "8px 0",
   wordBreak: "break-all" as const,
-  textDecoration: "underline",
   display: "block",
+}
+
+const linkStyle = {
+  color: "#0070f3",
+  textDecoration: "underline",
 }
 
 const buttonSection = {
@@ -117,5 +123,6 @@ const button = {
   textAlign: "center" as const,
   display: "inline-block",
   padding: "12px 24px",
+  cursor: "pointer",
 }
 

@@ -99,6 +99,7 @@ export const metadata: Metadata = {
     // Add your verification codes here when available
     // google: 'your-google-verification-code',
     yandex: '2171b91e0d6f4de5',
+    me: '30CDD1B2004D4FC8D5155CE351FFFC58',
     // yahoo: 'your-yahoo-verification-code',
     
   },

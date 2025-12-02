@@ -7,6 +7,7 @@ import {
   Text,
   Heading,
   Link,
+  Button,
 } from "@react-email/components"
 
 interface WelcomeEmailProps {
@@ -31,9 +32,9 @@ export function WelcomeEmail({ name, dashboardUrl }: WelcomeEmailProps) {
             </Text>
           </Section>
           <Section style={buttonSection}>
-            <Link href={dashboardUrl} style={button}>
+            <Button href={dashboardUrl} style={button}>
               Go to Dashboard
-            </Link>
+            </Button>
           </Section>
           <Section style={section}>
             <Text style={text}>Here's what you can do with Summaryr:</Text>
@@ -119,6 +120,7 @@ const button = {
   textAlign: "center" as const,
   display: "inline-block",
   padding: "12px 24px",
+  cursor: "pointer",
 }
 
 const list = {

@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { Resend } from "resend"
 import { render } from "@react-email/render"
 import { WelcomeEmail } from "@/emails/welcome-email"
+import { getBaseUrl } from "@/lib/url"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -62,9 +63,7 @@ export async function GET(request: NextRequest) {
     // Send welcome email
     try {
       if (process.env.RESEND_API_KEY) {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-                        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-                        "http://localhost:3000"
+        const baseUrl = getBaseUrl()
         const dashboardUrl = `${baseUrl}/dashboard`
 
         // Get user details for welcome email
