@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { DocumentViewer } from "@/components/document-viewer"
+import { DashboardNavbar } from "@/components/dashboard-navbar"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, BookOpen, FileQuestion, FileText, StickyNote, Lightbulb, Plus, MessageCircle } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+import { BookOpen, FileQuestion, FileText, StickyNote, Lightbulb, Plus, MessageCircle } from "lucide-react"
 import type { Document } from "@/lib/types"
 import { FlashcardDialog } from "@/components/flashcard-dialog"
 import { QuestionDialog } from "@/components/question-dialog"
@@ -72,21 +71,11 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-background sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/dashboard">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <div className="flex items-center gap-2">
-              <Image src="/logo.png" alt="Summaryr Logo" width={24} height={24} className="h-5 w-5 sm:h-6 sm:w-6" />
-              <h1 className="text-lg sm:text-xl font-semibold">Summaryr</h1>
-            </div>
-          </div>
-        </div>
-      </header>
+      <DashboardNavbar 
+        showBackButton 
+        backHref="/documents" 
+        title={document.title}
+      />
 
       <main className="container mx-auto px-4 py-4 sm:py-6 max-w-7xl">
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_350px]">

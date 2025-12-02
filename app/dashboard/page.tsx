@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { DocumentUpload } from "@/components/document-upload"
+import { DashboardNavbar } from "@/components/dashboard-navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { FileText, BookOpen, StickyNote, ArrowRight, TrendingUp, Clock, User, FileQuestion, Sparkles } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -87,29 +87,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Image src="/logo.png" alt="Summaryr Logo" width={28} height={28} className="h-7 w-7" />
-            <h1 className="text-xl font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Summaryr
-            </h1>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/documents">
-              <Button variant="ghost" size="sm">
-                <FileText className="h-4 w-4 mr-2" />
-                Documents
-              </Button>
-            </Link>
-            <form action="/auth/signout" method="post">
-              <Button variant="ghost" type="submit" size="sm">
-                Sign Out
-              </Button>
-            </form>
-          </div>
-        </div>
-      </header>
+      <DashboardNavbar userName={userName} />
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="mb-8">
