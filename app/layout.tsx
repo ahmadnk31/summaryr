@@ -116,7 +116,7 @@ export default function RootLayout({
           <meta name="keywords" content="study tools, AI learning, document processing, flashcards, study materials, PDF summarizer, educational technology, student tools, note taking, quiz generator" />
           <meta name="author" content="Summaryr Team" />
           <meta name="publisher" content="Summaryr" />
-          <meta name="msvalidate.01" content="30CDD1B2004D4FC8D5155CE351FFFC58" />
+          <meta name="msvalidate.01" content="30CDD1B2004D4FC8D5155CE351FFFC58" /> 
           <meta name="format-detection" content="email=false, address=false, telephone=false" />
           <meta name="robots" content="index, follow" />
           <meta name="googlebot" content="index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:-1" />
