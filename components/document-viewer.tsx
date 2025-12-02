@@ -106,15 +106,15 @@ export function DocumentViewer({
             {doc.file_type.toUpperCase()} • {new Date(doc.upload_date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
           </p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="overflow-hidden p-0">
           <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[calc(100vh-16rem)]">
             <div
               ref={contentRef}
-              className="prose prose-sm sm:prose-base dark:prose-invert max-w-none select-text px-2 sm:px-4 lg:px-6"
+              className="prose prose-sm sm:prose-base dark:prose-invert max-w-none select-text px-2 sm:px-4 lg:px-6 py-6"
               style={{ userSelect: "text" }}
             >
               {doc.extracted_text.split("\n\n").map((paragraph, index) => (
-                <p key={index} className="mb-4 leading-relaxed text-sm sm:text-base lg:text-lg">
+                <p key={index} className="mb-4 leading-relaxed text-sm sm:text-base lg:text-lg break-words whitespace-pre-wrap">
                   {paragraph}
                 </p>
               ))}
