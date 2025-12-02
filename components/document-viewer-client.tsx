@@ -81,7 +81,7 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
               </Link>
             </Button>
             <div className="flex items-center gap-2">
-              <Image src="/logo.svg" alt="Summaryr Logo" width={24} height={24} className="h-5 w-5 sm:h-6 sm:w-6" />
+              <Image src="/logo.png" alt="Summaryr Logo" width={24} height={24} className="h-5 w-5 sm:h-6 sm:w-6" />
               <h1 className="text-lg sm:text-xl font-semibold">Summaryr</h1>
             </div>
           </div>

@@ -60,7 +60,7 @@ export default async function DocumentsPage() {
               </Link>
             </Button>
             <div className="flex items-center gap-2">
-              <Image src="/logo.svg" alt="Summaryr Logo" width={24} height={24} className="h-6 w-6" />
+              <Image src="/logo.png" alt="Summaryr Logo" width={24} height={24} className="h-6 w-6" />
               <h1 className="text-xl font-semibold">My Documents</h1>
             </div>
           </div>
