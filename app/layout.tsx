@@ -8,8 +8,13 @@ import './globals.css'
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
+// Get base URL for metadata (works at build time)
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
+                (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+const ogImageUrl = `${baseUrl}/social-preview.webp`
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
+  metadataBase: new URL(baseUrl),
   title: {
     default: 'Summaryr - AI-Powered Study Materials & Document Processing',
     template: '%s | Summaryr',
@@ -70,10 +75,10 @@ export const metadata: Metadata = {
     description: 'Transform your documents into interactive study materials with AI. Generate summaries, flashcards, practice questions, and chat with your documents.',
     images: [
       {
-        url: '/dashboard-preview.png',
+        url: ogImageUrl,
         width: 1200,
         height: 630,
-        alt: 'Summaryr Dashboard Preview',
+        alt: 'Summaryr - AI-Powered Study Materials',
       },
     ],
   },
@@ -81,7 +86,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Summaryr - AI-Powered Study Materials & Document Processing',
     description: 'Transform your documents into interactive study materials with AI. Generate summaries, flashcards, practice questions, and chat with your documents.',
-    images: ['/dashboard-preview.png'],
+    images: [ogImageUrl],
     creator: '@summaryr',
   },
   robots: {
@@ -118,6 +123,21 @@ export default function RootLayout({
           <meta name="keywords" content="study tools, AI learning, document processing, flashcards, study materials, PDF summarizer, educational technology, student tools, note taking, quiz generator" />
           <meta name="author" content="Summaryr Team" />
           <meta name="publisher" content="Summaryr" />
+          <meta property="og:site_name" content="Summaryr" />
+          <meta property="og:image" content={ogImageUrl} />
+          <meta property="og:url" content={baseUrl} />
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content="Summaryr - AI-Powered Study Materials & Document Processing" />
+          <meta property="og:description" content="Transform your documents into interactive study materials with AI. Generate summaries, flashcards, practice questions, and chat with your documents." />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content="Summaryr - AI-Powered Study Materials" />
+          <meta property="og:image:type" content="image/webp" />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content="Summaryr - AI-Powered Study Materials" />
+          <meta property="og:image:type" content="image/webp" />
+          <meta property="og:image:width" content="1200" />
           <meta name="msvalidate.01" content="30CDD1B2004D4FC8D5155CE351FFFC58" /> 
           <meta name="yandex-verification" content="2171b91e0d6f4de5" />
           <meta name="format-detection" content="email=false, address=false, telephone=false" />

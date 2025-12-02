@@ -12,6 +12,11 @@ import { AnimatedSection } from "@/components/animated-section"
 import { Header } from "@/components/header"
 import type { Metadata } from 'next'
 
+// Get base URL for metadata (works at build time)
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
+                (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+const ogImageUrl = `${baseUrl}/social-preview.webp`
+
 export const metadata: Metadata = {
   title: 'Home',
   description: 'Transform your documents into interactive study materials with AI. Generate summaries, flashcards, practice questions, and chat with your documents. Perfect for students and educators worldwide.',
@@ -21,10 +26,10 @@ export const metadata: Metadata = {
     url: '/',
     images: [
       {
-        url: '/dashboard-preview.png',
+        url: ogImageUrl,
         width: 1200,
         height: 630,
-        alt: 'Summaryr Dashboard Preview',
+        alt: 'Summaryr - AI-Powered Study Materials',
       },
     ],
   },
@@ -32,7 +37,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Summaryr - AI-Powered Study Materials & Document Processing',
     description: 'Transform your documents into interactive study materials with AI.',
-    images: ['/dashboard-preview.png'],
+    images: [ogImageUrl],
   },
   alternates: {
     canonical: '/',
