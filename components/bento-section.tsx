@@ -5,7 +5,13 @@ import QuestionGeneration from "./bento/ben4"
 import DocumentChat from "./bento/ben5"
 import ExplanationsAndNotes from "./bento/ben6"
 
-const BentoCard = ({ title, description, Component }) => (
+interface BentoCardProps {
+  title: string
+  description: string
+  Component: React.ComponentType
+}
+
+const BentoCard = ({ title, description, Component }: BentoCardProps) => (
   <div className="overflow-hidden rounded-2xl border border-white/20 flex flex-col justify-start items-start relative">
     {/* Background with blur effect */}
     <div
