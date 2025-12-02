@@ -1,33 +1,60 @@
 import { HeroSection } from "@/components/hero-section"
 import { DashboardPreview } from "@/components/dashboard-preview"
-import { SocialProof } from "@/components/social-proof"
-import { BentoSection } from "@/components/bento-section"
-import { LargeTestimonial } from "@/components/large-testimonial"
-import { PricingSection } from "@/components/pricing-section"
-import { TestimonialGridSection } from "@/components/testimonial-grid-section"
-import { FAQSection } from "@/components/faq-section"
-import { CTASection } from "@/components/cta-section"
-import { FooterSection } from "@/components/footer-section"
-import { AnimatedSection } from "@/components/animated-section"
 import { Header } from "@/components/header"
+import { AnimatedSection } from "@/components/animated-section"
+import dynamic from "next/dynamic"
 import type { Metadata } from 'next'
+
+// Lazy load below-the-fold components
+const SocialProof = dynamic(() => import("@/components/social-proof").then(mod => ({ default: mod.SocialProof })), {
+  loading: () => <div className="h-32" />,
+})
+const BentoSection = dynamic(() => import("@/components/bento-section").then(mod => ({ default: mod.BentoSection })), {
+  loading: () => <div className="h-96" />,
+})
+const LargeTestimonial = dynamic(() => import("@/components/large-testimonial").then(mod => ({ default: mod.LargeTestimonial })), {
+  loading: () => <div className="h-64" />,
+})
+const PricingSection = dynamic(() => import("@/components/pricing-section").then(mod => ({ default: mod.PricingSection })), {
+  loading: () => <div className="h-96" />,
+})
+const TestimonialGridSection = dynamic(() => import("@/components/testimonial-grid-section").then(mod => ({ default: mod.TestimonialGridSection })), {
+  loading: () => <div className="h-96" />,
+})
+const FAQSection = dynamic(() => import("@/components/faq-section").then(mod => ({ default: mod.FAQSection })), {
+  loading: () => <div className="h-96" />,
+})
+const CTASection = dynamic(() => import("@/components/cta-section").then(mod => ({ default: mod.CTASection })), {
+  loading: () => <div className="h-64" />,
+})
+const FooterSection = dynamic(() => import("@/components/footer-section").then(mod => ({ default: mod.FooterSection })), {
+  loading: () => <div className="h-64" />,
+})
 
 // Get base URL for metadata (works at build time)
 // Safely construct base URL with proper fallbacks
 function getBaseUrlForMetadata(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL
+  // First priority: explicit NEXT_PUBLIC_APP_URL
+  if (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL.trim() !== '') {
+    const url = process.env.NEXT_PUBLIC_APP_URL.trim()
+    // Ensure it has protocol
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url
+    }
+    return `https://${url}`
   }
   
-  if (process.env.VERCEL_URL) {
-    // Ensure VERCEL_URL has protocol
-    const vercelUrl = process.env.VERCEL_URL.startsWith('http') 
-      ? process.env.VERCEL_URL 
-      : `https://${process.env.VERCEL_URL}`
-    return vercelUrl
+  // Second priority: Vercel URL
+  if (process.env.VERCEL_URL && process.env.VERCEL_URL.trim() !== '') {
+    const url = process.env.VERCEL_URL.trim()
+    // Ensure it has protocol
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url
+    }
+    return `https://${url}`
   }
   
-  // Fallback for build time (Vercel will set VERCEL_URL)
+  // Fallback for build time
   return 'https://summaryr.com'
 }
 
@@ -67,6 +94,7 @@ export default function LandingPage() {
       <Header />
       <div className="relative z-10">
         <main className="max-w-[1320px] mx-auto relative">
+          {/* Hero section - LCP element */}
           <HeroSection />
           {/* Dashboard Preview Wrapper */}
           <div className="relative -mt-32 md:-mt-48 lg:-mt-64 mb-16 md:mb-24 lg:mb-32">

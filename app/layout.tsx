@@ -5,30 +5,60 @@ import { Toaster } from 'sonner'
 import { StructuredData } from '@/components/structured-data'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const geist = Geist({ 
+  subsets: ["latin"],
+  display: 'swap',
+  preload: true,
+  variable: '--font-geist',
+});
+const geistMono = Geist_Mono({ 
+  subsets: ["latin"],
+  display: 'swap',
+  preload: true,
+  variable: '--font-geist-mono',
+});
 
 // Get base URL for metadata (works at build time)
 // Safely construct base URL with proper fallbacks
 function getBaseUrlForMetadata(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL
+  // First priority: explicit NEXT_PUBLIC_APP_URL
+  if (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL.trim() !== '') {
+    const url = process.env.NEXT_PUBLIC_APP_URL.trim()
+    // Ensure it has protocol
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url
+    }
+    return `https://${url}`
   }
   
-  if (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL !== '') {
-    // Ensure VERCEL_URL has protocol
-    return process.env.NEXT_PUBLIC_APP_URL
+  // Second priority: Vercel URL
+  if (process.env.VERCEL_URL && process.env.VERCEL_URL.trim() !== '') {
+    const url = process.env.VERCEL_URL.trim()
+    // Ensure it has protocol
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url
+    }
+    return `https://${url}`
   }
   
-  // Fallback for build time (Vercel will set VERCEL_URL)
+  // Fallback for build time
   return 'https://summaryr.com'
 }
 
 const baseUrl = getBaseUrlForMetadata()
 const ogImageUrl = `${baseUrl}/social-preview.webp`
 
+// Safely create URL object
+let metadataBaseUrl: URL
+try {
+  metadataBaseUrl = new URL(baseUrl)
+} catch (error) {
+  // Fallback to a safe URL if construction fails
+  metadataBaseUrl = new URL('https://summaryr.com')
+}
+
 export const metadata: Metadata = {
-  metadataBase: new URL(baseUrl),
+  metadataBase: metadataBaseUrl,
   title: {
     default: 'Summaryr - AI-Powered Study Materials & Document Processing',
     template: '%s | Summaryr',
@@ -152,8 +182,12 @@ export default function RootLayout({
           <meta name="format-detection" content="email=false, address=false, telephone=false" />
           <meta name="robots" content="index, follow" />
           <meta name="googlebot" content="index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:-1" />
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+          <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
       </head>
-      <body className={`font-sans antialiased`}>
+      <body className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}>
         <StructuredData />
         {children}
         <Toaster position="top-center" />

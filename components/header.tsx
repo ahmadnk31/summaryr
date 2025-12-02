@@ -33,7 +33,15 @@ export function Header() {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="Summaryr Logo" width={24} height={24} className="h-6 w-6" />
+            <Image 
+              src="/logo.png" 
+              alt="Summaryr Logo" 
+              width={24} 
+              height={24} 
+              className="h-6 w-6" 
+              priority
+              sizes="24px"
+            />
             <span className="text-foreground text-xl font-semibold">Summaryr</span>
           </Link>
           <nav className="hidden md:flex items-center gap-2">

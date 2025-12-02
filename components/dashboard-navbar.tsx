@@ -42,13 +42,15 @@ export function DashboardNavbar({
               href="/dashboard" 
               className="flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1 sm:flex-initial"
             >
-              <Image 
-                src="/logo.png" 
-                alt="Summaryr Logo" 
-                width={28} 
-                height={28} 
-                className="h-5 w-5 sm:h-7 sm:w-7 flex-shrink-0" 
-              />
+            <Image 
+              src="/logo.png" 
+              alt="Summaryr Logo" 
+              width={28} 
+              height={28} 
+              className="h-5 w-5 sm:h-7 sm:w-7 flex-shrink-0" 
+              priority
+              sizes="28px"
+            />
               <h1 className="text-base sm:text-xl font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate">
                 {title || "Summaryr"}
               </h1>

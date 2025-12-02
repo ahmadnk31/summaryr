@@ -10,6 +10,8 @@ export function DashboardPreview() {
         height={700}
         className="w-full h-auto object-contain rounded-xl"
         priority
+        quality={85}
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1160px"
       />
     </div>
   )
