@@ -67,7 +67,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Summaryr - AI-Powered Study Materials & Document Processing',
     description: 'Transform your documents into interactive study materials with AI. Generate summaries, flashcards, practice questions, and chat with your documents.',
-    url: '/',
+    url: `${baseUrl}/`,
     images: [
       {
         url: ogImageUrl,
@@ -84,7 +84,7 @@ export const metadata: Metadata = {
     images: [ogImageUrl],
   },
   alternates: {
-    canonical: '/',
+    canonical: `${baseUrl}/`,
   },
 }
 

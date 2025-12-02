@@ -6,16 +6,44 @@ import { Header } from "@/components/header"
 import { FooterSection } from "@/components/footer-section"
 import type { Metadata } from 'next'
 
+// Get base URL for metadata (works at build time)
+function getBaseUrlForMetadata(): string {
+  // First priority: explicit NEXT_PUBLIC_APP_URL
+  if (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL.trim() !== '') {
+    const url = process.env.NEXT_PUBLIC_APP_URL.trim()
+    // Ensure it has protocol
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url
+    }
+    return `https://${url}`
+  }
+  
+  // Second priority: Vercel URL
+  if (process.env.VERCEL_URL && process.env.VERCEL_URL.trim() !== '') {
+    const url = process.env.VERCEL_URL.trim()
+    // Ensure it has protocol
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url
+    }
+    return `https://${url}`
+  }
+  
+  // Fallback for build time
+  return 'https://summaryr.com'
+}
+
+const baseUrl = getBaseUrlForMetadata()
+
 export const metadata: Metadata = {
   title: 'About Us',
   description: 'Learn about Summaryr and our mission to transform how students learn and study by making document processing intelligent and accessible.',
   openGraph: {
     title: 'About Us | Summaryr',
     description: 'Learn about Summaryr and our mission to transform how students learn and study by making document processing intelligent and accessible.',
-    url: '/about-us',
+    url: `${baseUrl}/about-us`,
   },
   alternates: {
-    canonical: '/about-us',
+    canonical: `${baseUrl}/about-us`,
   },
 }
 

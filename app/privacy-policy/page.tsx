@@ -3,6 +3,34 @@ import { Header } from "@/components/header"
 import { FooterSection } from "@/components/footer-section"
 import type { Metadata } from 'next'
 
+// Get base URL for metadata (works at build time)
+function getBaseUrlForMetadata(): string {
+  // First priority: explicit NEXT_PUBLIC_APP_URL
+  if (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL.trim() !== '') {
+    const url = process.env.NEXT_PUBLIC_APP_URL.trim()
+    // Ensure it has protocol
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url
+    }
+    return `https://${url}`
+  }
+  
+  // Second priority: Vercel URL
+  if (process.env.VERCEL_URL && process.env.VERCEL_URL.trim() !== '') {
+    const url = process.env.VERCEL_URL.trim()
+    // Ensure it has protocol
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url
+    }
+    return `https://${url}`
+  }
+  
+  // Fallback for build time
+  return 'https://summaryr.com'
+}
+
+const baseUrl = getBaseUrlForMetadata()
+
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description: 'Read Summaryr\'s Privacy Policy to understand how we collect, use, and protect your personal information and data.',
@@ -13,10 +41,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Privacy Policy | Summaryr',
     description: 'Read Summaryr\'s Privacy Policy to understand how we collect, use, and protect your personal information and data.',
-    url: '/privacy-policy',
+    url: `${baseUrl}/privacy-policy`,
   },
   alternates: {
-    canonical: '/privacy-policy',
+    canonical: `${baseUrl}/privacy-policy`,
   },
 }
 
