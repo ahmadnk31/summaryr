@@ -25,15 +25,39 @@ export default function Page() {
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
         options: {
           emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
         },
       })
+      
       if (error) throw error
-      router.push("/dashboard")
+      
+      // Check if email is verified - redirect to verification page if not verified
+      if (data.user && !data.user.email_confirmed_at) {
+        // Resend verification email
+        try {
+          await fetch("/api/auth/send-verification", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          })
+        } catch (emailError) {
+          console.error("Failed to resend verification email:", emailError)
+        }
+        // Redirect to verification required page
+        router.push("/auth/verify-email-required")
+        return
+      }
+      
+      // Only redirect to dashboard if email is verified
+      if (data.user?.email_confirmed_at) {
+        router.push("/dashboard")
+      } else {
+        router.push("/auth/verify-email-required")
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {

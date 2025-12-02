@@ -52,15 +52,15 @@ export function QuestionDialog({ open, onOpenChange, documentId, selectedText, d
     try {
       // Generate questions one by one
       for (let i = 0; i < quantity; i++) {
-        const response = await fetch("/api/ai/question", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+      const response = await fetch("/api/ai/question", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             text: inputText,
             documentId,
             type: questionType,
           }),
-        })
+      })
 
         if (!response.ok) {
           throw new Error(`Failed to generate question ${i + 1}`)
@@ -84,7 +84,7 @@ export function QuestionDialog({ open, onOpenChange, documentId, selectedText, d
 
       onSuccess()
       setTimeout(() => {
-        onOpenChange(false)
+      onOpenChange(false)
       }, 1000)
     } catch (error) {
       console.error("Error generating questions:", error)
@@ -181,18 +181,18 @@ export function QuestionDialog({ open, onOpenChange, documentId, selectedText, d
               className="flex-1"
               disabled={!inputText?.trim() || isGenerating}
             >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" />
                   Generate {quantity} Question{quantity > 1 ? "s" : ""}
-                </>
-              )}
-            </Button>
+              </>
+            )}
+          </Button>
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isGenerating} className="w-full sm:w-auto">
               Cancel
             </Button>

@@ -20,6 +20,20 @@ export default async function DocumentPage({
     redirect("/auth/login")
   }
 
+  // Check if user exists in email_verifications table and is verified
+  const { data: verification } = await supabase
+    .from("email_verifications")
+    .select("verified")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  // User must exist in email_verifications table and be verified
+  if (!verification || verification.verified !== true) {
+    redirect("/auth/verify-email-required")
+  }
+
   const { data: document, error } = await supabase
     .from("documents")
     .select("*")

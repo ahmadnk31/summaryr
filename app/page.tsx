@@ -1,86 +1,91 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Brain, FileText, Zap, BookOpen } from "lucide-react"
+import { HeroSection } from "@/components/hero-section"
+import { DashboardPreview } from "@/components/dashboard-preview"
+import { SocialProof } from "@/components/social-proof"
+import { BentoSection } from "@/components/bento-section"
+import { LargeTestimonial } from "@/components/large-testimonial"
+import { PricingSection } from "@/components/pricing-section"
+import { TestimonialGridSection } from "@/components/testimonial-grid-section"
+import { FAQSection } from "@/components/faq-section"
+import { CTASection } from "@/components/cta-section"
+import { FooterSection } from "@/components/footer-section"
+import { AnimatedSection } from "@/components/animated-section"
+import { Header } from "@/components/header"
+import type { Metadata } from 'next'
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: 'Home',
+  description: 'Transform your documents into interactive study materials with AI. Generate summaries, flashcards, practice questions, and chat with your documents. Perfect for students and educators worldwide.',
+  openGraph: {
+    title: 'Summaryr - AI-Powered Study Materials & Document Processing',
+    description: 'Transform your documents into interactive study materials with AI. Generate summaries, flashcards, practice questions, and chat with your documents.',
+    url: '/',
+    images: [
+      {
+        url: '/dashboard-preview.png',
+        width: 1200,
+        height: 630,
+        alt: 'Summaryr Dashboard Preview',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Summaryr - AI-Powered Study Materials & Document Processing',
+    description: 'Transform your documents into interactive study materials with AI.',
+    images: ['/dashboard-preview.png'],
+  },
+  alternates: {
+    canonical: '/',
+  },
+}
+
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Brain className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold">DocStudy</h1>
+    <div className="min-h-screen bg-background relative pb-0">
+      <Header />
+      <div className="relative z-10">
+        <main className="max-w-[1320px] mx-auto relative">
+          <HeroSection />
+          {/* Dashboard Preview Wrapper */}
+          <div className="absolute bottom-[-70px] md:bottom-[-350px] lg:bottom-[-400px] left-1/2 transform -translate-x-1/2 z-20">
+            <AnimatedSection>
+              <DashboardPreview />
+            </AnimatedSection>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" asChild>
-              <Link href="/auth/login">Login</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/auth/sign-up">Sign Up</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main>
-        <section className="container mx-auto px-4 py-20 md:py-32">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
-              Transform Documents into Study Materials
-            </h2>
-            <p className="text-xl text-muted-foreground mb-8 text-balance">
-              Upload PDFs, DOCX, or EPUB files and instantly create flashcards, questions, summaries, and notes with
-              AI-powered tools
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild>
-                <Link href="/auth/sign-up">Get Started Free</Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/auth/login">Sign In</Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        <section className="container mx-auto px-4 py-20">
-          <div className="grid gap-8 md:grid-cols-3">
-            <div className="flex flex-col items-center text-center p-6">
-              <div className="rounded-full bg-primary/10 p-4 mb-4">
-                <FileText className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Upload Documents</h3>
-              <p className="text-muted-foreground">
-                Support for PDF, DOCX, and EPUB formats with automatic text extraction
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center text-center p-6">
-              <div className="rounded-full bg-primary/10 p-4 mb-4">
-                <Zap className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">AI-Powered Tools</h3>
-              <p className="text-muted-foreground">
-                Generate flashcards, questions, and summaries from any selected text
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center text-center p-6">
-              <div className="rounded-full bg-primary/10 p-4 mb-4">
-                <BookOpen className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Study Smarter</h3>
-              <p className="text-muted-foreground">Create notes and organize your study materials in one place</p>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="border-t bg-background/80 backdrop-blur-sm mt-20">
-        <div className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground">
-          <p>© 2025 DocStudy. Transform your learning experience.</p>
-        </div>
-      </footer>
+        </main>
+        <AnimatedSection className="relative z-10 max-w-[1320px] mx-auto px-6 mt-[100px] md:mt-[400px]" delay={0.1}>
+          <SocialProof />
+        </AnimatedSection>
+        <AnimatedSection id="features-section" className="relative z-10 max-w-[1320px] mx-auto mt-16" delay={0.2}>
+          <BentoSection />
+        </AnimatedSection>
+        <AnimatedSection className="relative z-10 max-w-[1320px] mx-auto mt-8 md:mt-16" delay={0.2}>
+          <LargeTestimonial />
+        </AnimatedSection>
+        <AnimatedSection
+          id="pricing-section"
+          className="relative z-10 max-w-[1320px] mx-auto mt-8 md:mt-16"
+          delay={0.2}
+        >
+          <PricingSection />
+        </AnimatedSection>
+        <AnimatedSection
+          id="testimonials-section"
+          className="relative z-10 max-w-[1320px] mx-auto mt-8 md:mt-16"
+          delay={0.2}
+        >
+          <TestimonialGridSection />
+        </AnimatedSection>
+        <AnimatedSection id="faq-section" className="relative z-10 max-w-[1320px] mx-auto mt-8 md:mt-16" delay={0.2}>
+          <FAQSection />
+        </AnimatedSection>
+        <AnimatedSection className="relative z-10 max-w-[1320px] mx-auto mt-8 md:mt-16" delay={0.2}>
+          <CTASection />
+        </AnimatedSection>
+        <AnimatedSection className="relative z-10 max-w-[1320px] mx-auto mt-8 md:mt-16" delay={0.2}>
+          <FooterSection />
+        </AnimatedSection>
+      </div>
     </div>
   )
 }

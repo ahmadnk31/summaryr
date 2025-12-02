@@ -2,9 +2,20 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Brain, ArrowLeft, Plus, Upload } from "lucide-react"
+import { ArrowLeft, Plus, Upload } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 import { DocumentsList } from "@/components/documents-list"
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'My Documents',
+  description: 'View and manage all your uploaded documents. Access your PDFs, DOCX files, and EPUB documents in one place.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 export default async function DocumentsPage() {
   const supabase = await createClient()
@@ -15,6 +26,20 @@ export default async function DocumentsPage() {
   } = await supabase.auth.getUser()
   if (error || !user) {
     redirect("/auth/login")
+  }
+
+  // Check if user exists in email_verifications table and is verified
+  const { data: verification } = await supabase
+    .from("email_verifications")
+    .select("verified")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  // User must exist in email_verifications table and be verified
+  if (!verification || verification.verified !== true) {
+    redirect("/auth/verify-email-required")
   }
 
   // Fetch all documents
@@ -35,7 +60,7 @@ export default async function DocumentsPage() {
               </Link>
             </Button>
             <div className="flex items-center gap-2">
-              <Brain className="h-6 w-6 text-primary" />
+              <Image src="/logo.svg" alt="Summaryr Logo" width={24} height={24} className="h-6 w-6" />
               <h1 className="text-xl font-semibold">My Documents</h1>
             </div>
           </div>

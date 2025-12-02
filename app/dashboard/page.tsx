@@ -3,8 +3,19 @@ import { createClient } from "@/lib/supabase/server"
 import { DocumentUpload } from "@/components/document-upload"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, BookOpen, Brain, StickyNote } from "lucide-react"
+import { FileText, BookOpen, StickyNote } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  description: 'Access your documents, flashcards, questions, and study materials. Upload new documents and create AI-powered study materials.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -15,6 +26,20 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser()
   if (error || !user) {
     redirect("/auth/login")
+  }
+
+  // Check if user exists in email_verifications table and is verified
+  const { data: verification } = await supabase
+    .from("email_verifications")
+    .select("verified")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  // User must exist in email_verifications table and be verified
+  if (!verification || verification.verified !== true) {
+    redirect("/auth/verify-email-required")
   }
 
   // Fetch recent documents
@@ -46,8 +71,8 @@ export default async function DashboardPage() {
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Brain className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold">DocStudy</h1>
+            <Image src="/logo.svg" alt="Summaryr Logo" width={24} height={24} className="h-6 w-6" />
+            <h1 className="text-xl font-semibold">Summaryr</h1>
           </div>
           <form action="/auth/signout" method="post">
             <Button variant="ghost" type="submit">
@@ -71,7 +96,7 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-2xl font-bold">{documentCount || 0}</div>
+              <div className="text-2xl font-bold">{documentCount || 0}</div>
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/documents">View All</Link>
                 </Button>
@@ -106,7 +131,7 @@ export default async function DashboardPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Recent Documents</CardTitle>
+              <CardTitle>Recent Documents</CardTitle>
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/documents">View All</Link>
                 </Button>

@@ -33,18 +33,70 @@ export default function Page() {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // Sign up user (without email confirmation)
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/verify-email-success`,
           data: {
             full_name: fullName,
           },
         },
       })
-      if (error) throw error
-      router.push("/auth/sign-up-success")
+      
+      if (signUpError) throw signUpError
+      
+      if (!signUpData.user) {
+        throw new Error("User creation failed")
+      }
+
+      // Create verification entry in database
+      try {
+        const createVerificationResponse = await fetch("/api/auth/create-verification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            userId: signUpData.user.id,
+            email: signUpData.user.email 
+          }),
+        })
+
+        if (!createVerificationResponse.ok) {
+          console.error("Failed to create verification entry")
+        }
+      } catch (verificationError) {
+        console.error("Error creating verification entry:", verificationError)
+      }
+
+      // Send custom verification email
+      try {
+        const verificationResponse = await fetch("/api/auth/send-verification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        })
+
+        if (!verificationResponse.ok) {
+          const errorData = await verificationResponse.json()
+          console.error("Failed to send verification email:", errorData)
+          // Don't fail signup if email fails, but log it
+        }
+      } catch (emailError) {
+        console.error("Error sending verification email:", emailError)
+        // Continue with signup even if email fails
+      }
+
+      // Store email for the success page
+      if (typeof window !== "undefined") {
+        localStorage.setItem("signup_email", email)
+      }
+
+      router.push(`/auth/sign-up-success?email=${encodeURIComponent(email)}`)
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
