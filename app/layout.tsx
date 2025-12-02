@@ -98,8 +98,9 @@ export const metadata: Metadata = {
   verification: {
     // Add your verification codes here when available
     // google: 'your-google-verification-code',
-    // yandex: 'your-yandex-verification-code',
+    yandex: '2171b91e0d6f4de5',
     // yahoo: 'your-yahoo-verification-code',
+    
   },
 }
 
@@ -117,6 +118,7 @@ export default function RootLayout({
           <meta name="author" content="Summaryr Team" />
           <meta name="publisher" content="Summaryr" />
           <meta name="msvalidate.01" content="30CDD1B2004D4FC8D5155CE351FFFC58" /> 
+          <meta name="yandex-verification" content="2171b91e0d6f4de5" />
           <meta name="format-detection" content="email=false, address=false, telephone=false" />
           <meta name="robots" content="index, follow" />
           <meta name="googlebot" content="index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:-1" />
