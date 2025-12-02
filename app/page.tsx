@@ -13,8 +13,25 @@ import { Header } from "@/components/header"
 import type { Metadata } from 'next'
 
 // Get base URL for metadata (works at build time)
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-                (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+// Safely construct base URL with proper fallbacks
+function getBaseUrlForMetadata(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL
+  }
+  
+  if (process.env.VERCEL_URL) {
+    // Ensure VERCEL_URL has protocol
+    const vercelUrl = process.env.VERCEL_URL.startsWith('http') 
+      ? process.env.VERCEL_URL 
+      : `https://${process.env.VERCEL_URL}`
+    return vercelUrl
+  }
+  
+  // Fallback for build time (Vercel will set VERCEL_URL)
+  return 'https://summaryr.com'
+}
+
+const baseUrl = getBaseUrlForMetadata()
 const ogImageUrl = `${baseUrl}/social-preview.webp`
 
 export const metadata: Metadata = {

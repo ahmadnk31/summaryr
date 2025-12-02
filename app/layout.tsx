@@ -9,8 +9,22 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 // Get base URL for metadata (works at build time)
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-                (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+// Safely construct base URL with proper fallbacks
+function getBaseUrlForMetadata(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL
+  }
+  
+  if (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL !== '') {
+    // Ensure VERCEL_URL has protocol
+    return process.env.NEXT_PUBLIC_APP_URL
+  }
+  
+  // Fallback for build time (Vercel will set VERCEL_URL)
+  return 'https://summaryr.com'
+}
+
+const baseUrl = getBaseUrlForMetadata()
 const ogImageUrl = `${baseUrl}/social-preview.webp`
 
 export const metadata: Metadata = {
@@ -133,11 +147,6 @@ export default function RootLayout({
           <meta property="og:image:height" content="630" />
           <meta property="og:image:alt" content="Summaryr - AI-Powered Study Materials" />
           <meta property="og:image:type" content="image/webp" />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="630" />
-          <meta property="og:image:alt" content="Summaryr - AI-Powered Study Materials" />
-          <meta property="og:image:type" content="image/webp" />
-          <meta property="og:image:width" content="1200" />
           <meta name="msvalidate.01" content="30CDD1B2004D4FC8D5155CE351FFFC58" /> 
           <meta name="yandex-verification" content="2171b91e0d6f4de5" />
           <meta name="format-detection" content="email=false, address=false, telephone=false" />
