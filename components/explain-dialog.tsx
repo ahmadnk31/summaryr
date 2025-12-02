@@ -52,7 +52,7 @@ export function ExplainDialog({ open, onOpenChange, documentId, selectedText, on
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh]">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg md:max-w-2xl lg:max-w-3xl max-h-[80vh]">
         <DialogHeader>
           <DialogTitle>Explain Text</DialogTitle>
           <DialogDescription>AI will explain your selected text in simple terms</DialogDescription>
@@ -119,7 +119,7 @@ export function ExplainDialog({ open, onOpenChange, documentId, selectedText, on
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             {isLoading ? (
               <Button onClick={stop} variant="destructive" className="flex-1">
                 Stop
@@ -131,7 +131,7 @@ export function ExplainDialog({ open, onOpenChange, documentId, selectedText, on
               </Button>
             )}
             {completion && !isLoading && (
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
                 Close
               </Button>
             )}

@@ -1,181 +1,201 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useCompletion } from "@ai-sdk/react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Sparkles } from "lucide-react"
+import { Sparkles, Loader2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface FlashcardDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   documentId: string
   selectedText: string
+  documentText?: string
   onSuccess: () => void
 }
 
-export function FlashcardDialog({ open, onOpenChange, documentId, selectedText, onSuccess }: FlashcardDialogProps) {
-  const [front, setFront] = useState("")
-  const [back, setBack] = useState("")
-  const [inputText, setInputText] = useState(selectedText)
+type FlashcardType = "basic" | "definition" | "concept" | "formula" | "vocabulary"
 
-  // Update inputText when selectedText changes
-  useEffect(() => {
-    if (selectedText) {
-      setInputText(selectedText)
-    }
-  }, [selectedText])
+export function FlashcardDialog({ open, onOpenChange, documentId, selectedText, documentText = "", onSuccess }: FlashcardDialogProps) {
+  const [quantity, setQuantity] = useState(1)
+  const [flashcardType, setFlashcardType] = useState<FlashcardType>("basic")
+  const [inputText, setInputText] = useState("")
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [generatedCount, setGeneratedCount] = useState(0)
 
-  // Reset state when dialog opens
+  // Initialize inputText when dialog opens
   useEffect(() => {
     if (open) {
-      setFront("")
-      setBack("")
-    }
-  }, [open])
-
-  const { completion, complete, isLoading, stop } = useCompletion({
-    api: "/api/ai/flashcard",
-    body: {
-      text: inputText || selectedText,
-      documentId,
-    },
-    onFinish: () => {
-      // Parse the JSON response only if completion exists and is not empty
-      if (completion && completion.trim()) {
-        try {
-          const parsed = JSON.parse(completion.trim())
-          if (parsed.front) setFront(parsed.front)
-          if (parsed.back) setBack(parsed.back)
-        } catch (e) {
-          console.error("Error parsing flashcard:", e)
-        }
+      if (selectedText) {
+        setInputText(selectedText)
+      } else if (documentText) {
+        // Use first 2000 chars of document if no selection
+        setInputText(documentText.substring(0, 2000))
       }
+      setQuantity(1)
+      setFlashcardType("basic")
+      setGeneratedCount(0)
+      setIsGenerating(false)
+    }
+  }, [open, selectedText, documentText])
+
+  const handleGenerate = async () => {
+    if (!inputText.trim()) return
+
+    setIsGenerating(true)
+    setGeneratedCount(0)
+
+    try {
+      // Generate flashcards one by one
+      for (let i = 0; i < quantity; i++) {
+        const response = await fetch("/api/ai/flashcard", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: inputText,
+            documentId,
+            type: flashcardType,
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to generate flashcard ${i + 1}`)
+        }
+
+        // Read the stream
+        const reader = response.body?.getReader()
+        const decoder = new TextDecoder()
+        let accumulatedText = ""
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            accumulatedText += decoder.decode(value, { stream: true })
+          }
+        }
+
+        setGeneratedCount(i + 1)
+      }
+
       onSuccess()
       setTimeout(() => {
         onOpenChange(false)
-      }, 500)
-    },
-  })
-
-  // Update state as completion streams
-  useEffect(() => {
-    if (completion && completion.trim()) {
-      try {
-        const trimmed = completion.trim()
-        // Only try to parse if it looks like JSON (starts with {)
-        if (trimmed.startsWith("{")) {
-          // Try to find the last complete JSON object
-          let jsonStr = trimmed
-          // If it doesn't end with }, try to find the last complete object
-          if (!trimmed.endsWith("}")) {
-            const lastBrace = trimmed.lastIndexOf("}")
-            if (lastBrace > 0) {
-              jsonStr = trimmed.substring(0, lastBrace + 1)
-            }
-          }
-          const parsed = JSON.parse(jsonStr)
-          if (parsed.front) setFront(parsed.front)
-          if (parsed.back) setBack(parsed.back)
-        }
-      } catch (e) {
-        // JSON not complete yet, try to extract partial values
-        try {
-          // Try to extract partial JSON values using regex
-          const frontMatch = completion.match(/"front"\s*:\s*"([^"]*)"/)
-          const backMatch = completion.match(/"back"\s*:\s*"([^"]*)"/)
-          
-          if (frontMatch && frontMatch[1]) setFront(frontMatch[1])
-          if (backMatch && backMatch[1]) setBack(backMatch[1])
-        } catch (regexError) {
-          // Ignore regex errors
-        }
-      }
+      }, 1000)
+    } catch (error) {
+      console.error("Error generating flashcards:", error)
+      alert("Failed to generate flashcards. Please try again.")
+    } finally {
+      setIsGenerating(false)
     }
-  }, [completion])
-
-  const handleGenerate = () => {
-    // Reset state before generating
-    setFront("")
-    setBack("")
-    complete("")
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg md:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Generate Flashcard</DialogTitle>
-          <DialogDescription>AI will create a flashcard from your selected text</DialogDescription>
+          <DialogTitle>Generate Flashcards</DialogTitle>
+          <DialogDescription>
+            Create flashcards from your text. Use selected text or the entire document.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="quantity">Number of Flashcards</Label>
+              <Input
+                id="quantity"
+                type="number"
+                min="1"
+                max="10"
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
+                className="mt-2"
+                disabled={isGenerating}
+              />
+            </div>
+            <div>
+              <Label htmlFor="type">Flashcard Type</Label>
+              <Select value={flashcardType} onValueChange={(value) => setFlashcardType(value as FlashcardType)} disabled={isGenerating}>
+                <SelectTrigger id="type" className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="basic">Basic Q&A</SelectItem>
+                  <SelectItem value="definition">Definition</SelectItem>
+                  <SelectItem value="concept">Concept Explanation</SelectItem>
+                  <SelectItem value="formula">Formula</SelectItem>
+                  <SelectItem value="vocabulary">Vocabulary</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div>
-            <Label>Text to Generate Flashcard From</Label>
+            <Label>Text to Generate From</Label>
             <Textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Enter or paste text here, or select text from the document..."
-              className="mt-2 min-h-24"
-              disabled={isLoading}
+              placeholder={selectedText ? "Selected text will be used..." : "Enter text or use document content..."}
+              className="mt-2 min-h-32"
+              disabled={isGenerating}
             />
-            {selectedText && selectedText !== inputText && (
-              <p className="text-xs text-muted-foreground mt-1">You can edit the selected text above</p>
+            {selectedText && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Using selected text. You can edit it above or use the full document.
+              </p>
+            )}
+            {!selectedText && documentText && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Using document content (first 2000 chars). You can edit it above.
+              </p>
             )}
           </div>
 
-          {(front || back || isLoading || completion) && (
-            <div className="space-y-3">
-              {isLoading && !front && !back && (
-                <div>
-                  <Label>Generating...</Label>
-                  <div className="mt-2 p-3 bg-muted rounded-lg text-sm">
-                    <span className="text-muted-foreground">Creating flashcard...</span>
-                    <span className="inline-block w-2 h-4 bg-current ml-1 animate-pulse" />
-                  </div>
-                </div>
-              )}
-              {front && (
-                <div>
-                  <Label>Front</Label>
-                  <div className="mt-2 p-3 bg-muted rounded-lg text-sm">{front}</div>
-                </div>
-              )}
-              {back && (
-                <div>
-                  <Label>Back</Label>
-                  <div className="mt-2 p-3 bg-muted rounded-lg text-sm">{back}</div>
-                </div>
-              )}
-              {completion && !front && !back && (
-                <div>
-                  <Label>Raw Response (Debug)</Label>
-                  <div className="mt-2 p-3 bg-muted rounded-lg text-sm max-h-32 overflow-y-auto">
-                    {completion}
-                  </div>
-                </div>
-              )}
+          {isGenerating && (
+            <div className="p-4 bg-muted rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm font-medium">Generating flashcards...</span>
+              </div>
+              <div className="w-full bg-background rounded-full h-2">
+                <div
+                  className="bg-primary h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(generatedCount / quantity) * 100}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {generatedCount} of {quantity} flashcards created
+              </p>
             </div>
           )}
 
-          <div className="flex gap-2">
-            {isLoading ? (
-              <Button onClick={stop} variant="destructive" className="flex-1">
-                Stop
-              </Button>
-            ) : (
-              <Button onClick={handleGenerate} className="flex-1" disabled={!inputText?.trim()}>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Generate Flashcard
-              </Button>
-            )}
-            {front && !isLoading && (
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Close
-              </Button>
-            )}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              onClick={handleGenerate}
+              className="flex-1"
+              disabled={!inputText?.trim() || isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generate {quantity} Flashcard{quantity > 1 ? "s" : ""}
+                </>
+              )}
+            </Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isGenerating} className="w-full sm:w-auto">
+              Cancel
+            </Button>
           </div>
         </div>
       </DialogContent>

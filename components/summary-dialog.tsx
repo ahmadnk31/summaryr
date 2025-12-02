@@ -57,7 +57,7 @@ export function SummaryDialog({ open, onOpenChange, documentId, selectedText, on
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg md:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Generate Summary</DialogTitle>
           <DialogDescription>AI will summarize your selected text</DialogDescription>
@@ -146,7 +146,7 @@ export function SummaryDialog({ open, onOpenChange, documentId, selectedText, on
             </div>
           )}
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             {isLoading ? (
               <Button onClick={stop} variant="destructive" className="flex-1">
                 Stop
@@ -158,7 +158,7 @@ export function SummaryDialog({ open, onOpenChange, documentId, selectedText, on
               </Button>
             )}
             {completion && !isLoading && (
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
                 Close
               </Button>
             )}

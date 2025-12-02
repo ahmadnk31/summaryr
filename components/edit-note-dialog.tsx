@@ -65,7 +65,7 @@ export function EditNoteDialog({ open, onOpenChange, note, onSuccess }: EditNote
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg md:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Edit Note</DialogTitle>
           <DialogDescription>Update your note content</DialogDescription>

@@ -103,18 +103,18 @@ export function DocumentViewer({
         <CardHeader>
           <CardTitle>{doc.title}</CardTitle>
           <p className="text-sm text-muted-foreground">
-            {doc.file_type.toUpperCase()} • {new Date(doc.upload_date).toLocaleDateString()}
+            {doc.file_type.toUpperCase()} • {new Date(doc.upload_date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
           </p>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[calc(100vh-16rem)]">
+          <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[calc(100vh-16rem)]">
             <div
               ref={contentRef}
-              className="prose prose-sm dark:prose-invert max-w-none select-text"
+              className="prose prose-sm sm:prose-base dark:prose-invert max-w-none select-text px-2 sm:px-4 lg:px-6"
               style={{ userSelect: "text" }}
             >
               {doc.extracted_text.split("\n\n").map((paragraph, index) => (
-                <p key={index} className="mb-4 leading-relaxed">
+                <p key={index} className="mb-4 leading-relaxed text-sm sm:text-base lg:text-lg">
                   {paragraph}
                 </p>
               ))}

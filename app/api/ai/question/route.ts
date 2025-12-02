@@ -18,11 +18,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { text, documentId } = await req.json()
+    const { text, documentId, type = "short_answer" } = await req.json()
 
     if (!text) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 })
     }
+
+    const typePrompts: Record<string, string> = {
+      short_answer: "Create a short answer question that requires a brief, focused response.",
+      multiple_choice: "Create a multiple choice question with 4 options (A, B, C, D) and indicate the correct answer.",
+      true_false: "Create a true/false question with a clear statement.",
+      essay: "Create an essay question that requires a detailed, comprehensive answer.",
+      fill_blank: "Create a fill-in-the-blank question with a sentence or paragraph missing key terms.",
+    }
+
+    const typePrompt = typePrompts[type] || typePrompts.short_answer
 
     // Detect language from the first 500 characters
     const { text: languageCode } = await generateText({
@@ -90,7 +100,7 @@ export async function POST(req: Request) {
         answer: z.string().describe("The answer to the question"),
         difficulty: z.enum(["easy", "medium", "hard"]).describe("The difficulty level"),
       }),
-      prompt: `Create a study question in ${languageName} from the following text. The question should test understanding of the key concepts.
+      prompt: `Create a study question in ${languageName} from the following text. ${typePrompt} The question should test understanding of the key concepts.
 
 Text: ${text}`,
       onFinish: async ({ object }) => {

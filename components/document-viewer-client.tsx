@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DocumentViewer } from "@/components/document-viewer"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -33,6 +33,11 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
   const [noteDialogOpen, setNoteDialogOpen] = useState(false)
   const [notePosition, setNotePosition] = useState<{ start?: number; end?: number }>({})
   const [refreshKey, setRefreshKey] = useState(0)
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const handleCreateFlashcard = (text: string) => {
     setSelectedText(text)
@@ -67,24 +72,24 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-background sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="container mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Button variant="ghost" size="icon" asChild>
               <Link href="/dashboard">
                 <ArrowLeft className="h-5 w-5" />
               </Link>
             </Button>
             <div className="flex items-center gap-2">
-              <Brain className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-semibold">DocStudy</h1>
+              <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              <h1 className="text-lg sm:text-xl font-semibold">DocStudy</h1>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6">
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+      <main className="container mx-auto px-4 py-4 sm:py-6 max-w-7xl">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_350px]">
+          <div className="order-2 lg:order-1 min-w-0">
             <DocumentViewer
               document={document}
               onCreateFlashcard={handleCreateFlashcard}
@@ -95,35 +100,36 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
             />
           </div>
 
-          <div>
-            <Card className="h-[calc(100vh-8rem)] flex flex-col">
+          <div className="order-1 lg:order-2 min-w-0">
+            <Card className="h-auto lg:h-[calc(100vh-8rem)] flex flex-col w-full">
               <CardHeader className="flex-shrink-0">
-                <CardTitle>Study Materials</CardTitle>
+                <CardTitle className="text-base sm:text-lg">Study Materials</CardTitle>
               </CardHeader>
               <CardContent className="flex-1 overflow-y-auto">
-                <Tabs defaultValue="chat" className="w-full">
-                  <TabsList className="grid w-full grid-cols-6 sticky top-0 bg-background z-10 mb-4">
-                    <TabsTrigger value="chat" className="text-xs">
-                      <MessageCircle className="h-4 w-4" />
+                {isMounted ? (
+                  <Tabs defaultValue="chat" className="w-full">
+                    <TabsList className="flex w-full sm:grid sm:grid-cols-6 overflow-x-auto sticky top-0 bg-background z-10 mb-4 h-auto scrollbar-hide">
+                    <TabsTrigger value="chat" className="text-[10px] sm:text-xs p-1.5 sm:p-2 flex-shrink-0">
+                      <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                     </TabsTrigger>
-                    <TabsTrigger value="flashcards" className="text-xs">
-                      <BookOpen className="h-4 w-4" />
+                    <TabsTrigger value="flashcards" className="text-[10px] sm:text-xs p-1.5 sm:p-2 flex-shrink-0">
+                      <BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />
                     </TabsTrigger>
-                    <TabsTrigger value="questions" className="text-xs">
-                      <FileQuestion className="h-4 w-4" />
+                    <TabsTrigger value="questions" className="text-[10px] sm:text-xs p-1.5 sm:p-2 flex-shrink-0">
+                      <FileQuestion className="h-3 w-3 sm:h-4 sm:w-4" />
                     </TabsTrigger>
-                    <TabsTrigger value="summaries" className="text-xs">
-                      <FileText className="h-4 w-4" />
+                    <TabsTrigger value="summaries" className="text-[10px] sm:text-xs p-1.5 sm:p-2 flex-shrink-0">
+                      <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
                     </TabsTrigger>
-                    <TabsTrigger value="explanations" className="text-xs">
-                      <Lightbulb className="h-4 w-4" />
+                    <TabsTrigger value="explanations" className="text-[10px] sm:text-xs p-1.5 sm:p-2 flex-shrink-0">
+                      <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4" />
                     </TabsTrigger>
-                    <TabsTrigger value="notes" className="text-xs">
-                      <StickyNote className="h-4 w-4" />
+                    <TabsTrigger value="notes" className="text-[10px] sm:text-xs p-1.5 sm:p-2 flex-shrink-0">
+                      <StickyNote className="h-3 w-3 sm:h-4 sm:w-4" />
                     </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="chat" className="mt-0 h-[calc(100vh-12rem)]">
+                  <TabsContent value="chat" className="mt-0 h-[400px] sm:h-[500px] lg:h-[calc(100vh-12rem)]">
                     <DocumentChat documentId={document.id} documentText={document.extracted_text} />
                   </TabsContent>
 
@@ -191,7 +197,12 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
                     </Button>
                     <NoteList documentId={document.id} refreshKey={refreshKey} />
                   </TabsContent>
-                </Tabs>
+                  </Tabs>
+                ) : (
+                  <div className="flex items-center justify-center h-32">
+                    <p className="text-sm text-muted-foreground">Loading...</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -203,6 +214,7 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
         onOpenChange={setFlashcardDialogOpen}
         documentId={document.id}
         selectedText={selectedText}
+        documentText={document.extracted_text}
         onSuccess={handleSuccess}
       />
 
@@ -211,6 +223,7 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
         onOpenChange={setQuestionDialogOpen}
         documentId={document.id}
         selectedText={selectedText}
+        documentText={document.extracted_text}
         onSuccess={handleSuccess}
       />
 

@@ -70,7 +70,12 @@ export default async function DashboardPage() {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{documentCount || 0}</div>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-bold">{documentCount || 0}</div>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/documents">View All</Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -100,7 +105,12 @@ export default async function DashboardPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Recent Documents</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Recent Documents</CardTitle>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/documents">View All</Link>
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {documents && documents.length > 0 ? (
@@ -115,7 +125,7 @@ export default async function DashboardPage() {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{doc.title}</p>
                         <p className="text-xs text-muted-foreground">
-                          {doc.file_type.toUpperCase()} • {new Date(doc.upload_date).toLocaleDateString()}
+                          {doc.file_type.toUpperCase()} • {new Date(doc.upload_date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                         </p>
                       </div>
                     </Link>

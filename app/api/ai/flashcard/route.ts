@@ -18,11 +18,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { text, documentId } = await req.json()
+    const { text, documentId, type = "basic" } = await req.json()
 
     if (!text) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 })
     }
+
+    const typePrompts: Record<string, string> = {
+      basic: "Create a basic flashcard with a question on the front and answer on the back.",
+      definition: "Create a definition flashcard with a term on the front and its definition on the back.",
+      concept: "Create a concept flashcard with a concept name on the front and detailed explanation on the back.",
+      formula: "Create a formula flashcard with a formula or equation on the front and explanation/application on the back.",
+      vocabulary: "Create a vocabulary flashcard with a word on the front and its meaning, usage, and example on the back.",
+    }
+
+    const typePrompt = typePrompts[type] || typePrompts.basic
 
     // Detect language from the first 500 characters
     const { text: languageCode } = await generateText({
@@ -89,7 +99,7 @@ export async function POST(req: Request) {
         front: z.string().describe("The front of the flashcard (question or prompt)"),
         back: z.string().describe("The back of the flashcard (answer or explanation)"),
       }),
-      prompt: `Create a flashcard in ${languageName} from the following text. The front should be a clear question or prompt, and the back should be the answer or explanation.
+      prompt: `Create a flashcard in ${languageName} from the following text. ${typePrompt}
 
 Text: ${text}`,
       onFinish: async ({ object }) => {

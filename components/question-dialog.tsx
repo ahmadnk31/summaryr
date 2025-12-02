@@ -1,194 +1,201 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useCompletion } from "@ai-sdk/react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Sparkles } from "lucide-react"
+import { Sparkles, Loader2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface QuestionDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   documentId: string
   selectedText: string
+  documentText?: string
   onSuccess: () => void
 }
 
-export function QuestionDialog({ open, onOpenChange, documentId, selectedText, onSuccess }: QuestionDialogProps) {
-  const [questionText, setQuestionText] = useState<string>("")
-  const [answerText, setAnswerText] = useState<string>("")
-  const [difficulty, setDifficulty] = useState<string>("")
-  const [inputText, setInputText] = useState(selectedText)
+type QuestionType = "multiple_choice" | "short_answer" | "true_false" | "essay" | "fill_blank"
 
-  // Update inputText when selectedText changes
-  useEffect(() => {
-    if (selectedText) {
-      setInputText(selectedText)
-    }
-  }, [selectedText])
+export function QuestionDialog({ open, onOpenChange, documentId, selectedText, documentText = "", onSuccess }: QuestionDialogProps) {
+  const [quantity, setQuantity] = useState(1)
+  const [questionType, setQuestionType] = useState<QuestionType>("short_answer")
+  const [inputText, setInputText] = useState("")
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [generatedCount, setGeneratedCount] = useState(0)
 
-  // Reset state when dialog opens
+  // Initialize inputText when dialog opens
   useEffect(() => {
     if (open) {
-      setQuestionText("")
-      setAnswerText("")
-      setDifficulty("")
-    }
-  }, [open])
-
-  const { completion, complete, isLoading, stop } = useCompletion({
-    api: "/api/ai/question",
-    body: {
-      text: inputText || selectedText,
-      documentId,
-    },
-    onFinish: () => {
-      // Parse the JSON response only if completion exists and is not empty
-      if (completion && completion.trim()) {
-        try {
-          const parsed = JSON.parse(completion.trim())
-          if (parsed.question) setQuestionText(parsed.question)
-          if (parsed.answer) setAnswerText(parsed.answer)
-          if (parsed.difficulty) setDifficulty(parsed.difficulty)
-        } catch (e) {
-          console.error("Error parsing question:", e)
-        }
+      if (selectedText) {
+        setInputText(selectedText)
+      } else if (documentText) {
+        // Use first 2000 chars of document if no selection
+        setInputText(documentText.substring(0, 2000))
       }
+      setQuantity(1)
+      setQuestionType("short_answer")
+      setGeneratedCount(0)
+      setIsGenerating(false)
+    }
+  }, [open, selectedText, documentText])
+
+  const handleGenerate = async () => {
+    if (!inputText.trim()) return
+
+    setIsGenerating(true)
+    setGeneratedCount(0)
+
+    try {
+      // Generate questions one by one
+      for (let i = 0; i < quantity; i++) {
+        const response = await fetch("/api/ai/question", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: inputText,
+            documentId,
+            type: questionType,
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to generate question ${i + 1}`)
+        }
+
+        // Read the stream
+        const reader = response.body?.getReader()
+        const decoder = new TextDecoder()
+        let accumulatedText = ""
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            accumulatedText += decoder.decode(value, { stream: true })
+          }
+        }
+
+        setGeneratedCount(i + 1)
+      }
+
       onSuccess()
       setTimeout(() => {
         onOpenChange(false)
-      }, 500)
-    },
-  })
-
-  // Update state as completion streams
-  useEffect(() => {
-    if (completion && completion.trim()) {
-      try {
-        const trimmed = completion.trim()
-        // Only try to parse if it looks like JSON (starts with {)
-        if (trimmed.startsWith("{")) {
-          // Try to find the last complete JSON object
-          let jsonStr = trimmed
-          // If it doesn't end with }, try to find the last complete object
-          if (!trimmed.endsWith("}")) {
-            const lastBrace = trimmed.lastIndexOf("}")
-            if (lastBrace > 0) {
-              jsonStr = trimmed.substring(0, lastBrace + 1)
-            }
-          }
-          const parsed = JSON.parse(jsonStr)
-          if (parsed.question) setQuestionText(parsed.question)
-          if (parsed.answer) setAnswerText(parsed.answer)
-          if (parsed.difficulty) setDifficulty(parsed.difficulty)
-        }
-      } catch (e) {
-        // JSON not complete yet, try to extract partial values
-        try {
-          // Try to extract partial JSON values using regex
-          const questionMatch = completion.match(/"question"\s*:\s*"([^"]*)"/)
-          const answerMatch = completion.match(/"answer"\s*:\s*"([^"]*)"/)
-          const difficultyMatch = completion.match(/"difficulty"\s*:\s*"([^"]*)"/)
-          
-          if (questionMatch && questionMatch[1]) setQuestionText(questionMatch[1])
-          if (answerMatch && answerMatch[1]) setAnswerText(answerMatch[1])
-          if (difficultyMatch && difficultyMatch[1]) setDifficulty(difficultyMatch[1])
-        } catch (regexError) {
-          // Ignore regex errors
-        }
-      }
+      }, 1000)
+    } catch (error) {
+      console.error("Error generating questions:", error)
+      alert("Failed to generate questions. Please try again.")
+    } finally {
+      setIsGenerating(false)
     }
-  }, [completion])
-
-  const handleGenerate = () => {
-    // Reset state before generating
-    setQuestionText("")
-    setAnswerText("")
-    setDifficulty("")
-    complete("")
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg md:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Generate Question</DialogTitle>
-          <DialogDescription>AI will create a study question from your selected text</DialogDescription>
+          <DialogTitle>Generate Questions</DialogTitle>
+          <DialogDescription>
+            Create study questions from your text. Use selected text or the entire document.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="quantity">Number of Questions</Label>
+              <Input
+                id="quantity"
+                type="number"
+                min="1"
+                max="10"
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
+                className="mt-2"
+                disabled={isGenerating}
+              />
+            </div>
+            <div>
+              <Label htmlFor="type">Question Type</Label>
+              <Select value={questionType} onValueChange={(value) => setQuestionType(value as QuestionType)} disabled={isGenerating}>
+                <SelectTrigger id="type" className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="short_answer">Short Answer</SelectItem>
+                  <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+                  <SelectItem value="true_false">True/False</SelectItem>
+                  <SelectItem value="essay">Essay Question</SelectItem>
+                  <SelectItem value="fill_blank">Fill in the Blank</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div>
-            <Label>Text to Generate Question From</Label>
+            <Label>Text to Generate From</Label>
             <Textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Enter or paste text here, or select text from the document..."
-              className="mt-2 min-h-24"
-              disabled={isLoading}
+              placeholder={selectedText ? "Selected text will be used..." : "Enter text or use document content..."}
+              className="mt-2 min-h-32"
+              disabled={isGenerating}
             />
-            {selectedText && selectedText !== inputText && (
-              <p className="text-xs text-muted-foreground mt-1">You can edit the selected text above</p>
+            {selectedText && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Using selected text. You can edit it above or use the full document.
+              </p>
+            )}
+            {!selectedText && documentText && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Using document content (first 2000 chars). You can edit it above.
+              </p>
             )}
           </div>
 
-          {(questionText || answerText || difficulty || isLoading || completion) && (
-            <div className="space-y-3">
-              {isLoading && !questionText && !answerText && (
-                <div>
-                  <Label>Generating...</Label>
-                  <div className="mt-2 p-3 bg-muted rounded-lg text-sm">
-                    <span className="text-muted-foreground">Creating question...</span>
-                    <span className="inline-block w-2 h-4 bg-current ml-1 animate-pulse" />
-                  </div>
-                </div>
-              )}
-              {questionText && (
-                <div>
-                  <Label>Question</Label>
-                  <div className="mt-2 p-3 bg-muted rounded-lg text-sm">{questionText}</div>
-                </div>
-              )}
-              {answerText && (
-                <div>
-                  <Label>Answer</Label>
-                  <div className="mt-2 p-3 bg-muted rounded-lg text-sm">{answerText}</div>
-                </div>
-              )}
-              {difficulty && (
-                <div>
-                  <Label>Difficulty</Label>
-                  <div className="mt-2 p-3 bg-muted rounded-lg text-sm capitalize">{difficulty}</div>
-                </div>
-              )}
-              {completion && !questionText && !answerText && (
-                <div>
-                  <Label>Raw Response (Debug)</Label>
-                  <div className="mt-2 p-3 bg-muted rounded-lg text-sm max-h-32 overflow-y-auto">
-                    {completion}
-                  </div>
-                </div>
-              )}
+          {isGenerating && (
+            <div className="p-4 bg-muted rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm font-medium">Generating questions...</span>
+              </div>
+              <div className="w-full bg-background rounded-full h-2">
+                <div
+                  className="bg-primary h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(generatedCount / quantity) * 100}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {generatedCount} of {quantity} questions created
+              </p>
             </div>
           )}
 
-          <div className="flex gap-2">
-            {isLoading ? (
-              <Button onClick={stop} variant="destructive" className="flex-1">
-                Stop
-              </Button>
-            ) : (
-              <Button onClick={handleGenerate} className="flex-1" disabled={!inputText?.trim()}>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Generate Question
-              </Button>
-            )}
-            {questionText && !isLoading && (
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Close
-              </Button>
-            )}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              onClick={handleGenerate}
+              className="flex-1"
+              disabled={!inputText?.trim() || isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generate {quantity} Question{quantity > 1 ? "s" : ""}
+                </>
+              )}
+            </Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isGenerating} className="w-full sm:w-auto">
+              Cancel
+            </Button>
           </div>
         </div>
       </DialogContent>
