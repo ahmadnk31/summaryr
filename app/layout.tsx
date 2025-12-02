@@ -14,6 +14,7 @@ export const metadata: Metadata = {
     default: 'Summaryr - AI-Powered Study Materials & Document Processing',
     template: '%s | Summaryr',
   },
+  
   description: 'Transform your documents into interactive study materials with AI. Generate summaries, flashcards, practice questions, and chat with your documents. Perfect for students and educators.',
   keywords: ['study tools', 'AI learning', 'document processing', 'flashcards', 'study materials', 'PDF summarizer', 'educational technology', 'student tools', 'note taking', 'quiz generator'],
   authors: [{ name: 'Summaryr Team' }],
@@ -109,6 +110,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta name="description" content="Transform your documents into interactive study materials with AI. Generate summaries, flashcards, practice questions, and chat with your documents. Perfect for students and educators." />
+          <meta name="keywords" content="study tools, AI learning, document processing, flashcards, study materials, PDF summarizer, educational technology, student tools, note taking, quiz generator" />
+          <meta name="author" content="Summaryr Team" />
+          <meta name="publisher" content="Summaryr" />
+          <meta name="msvalidate.01" content="30CDD1B2004D4FC8D5155CE351FFFC58" />
+          <meta name="format-detection" content="email=false, address=false, telephone=false" />
+          <meta name="robots" content="index, follow" />
+          <meta name="googlebot" content="index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:-1" />
+      </head>
       <body className={`font-sans antialiased`}>
         <StructuredData />
         {children}
