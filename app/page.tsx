@@ -4,6 +4,8 @@ import { Header } from "@/components/header"
 import { AnimatedSection } from "@/components/animated-section"
 import dynamic from "next/dynamic"
 import type { Metadata } from 'next'
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
 
 // Lazy load below-the-fold components
 const SocialProof = dynamic(() => import("@/components/social-proof").then(mod => ({ default: mod.SocialProof })), {
@@ -88,7 +90,18 @@ export const metadata: Metadata = {
   },
 }
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  // Check if user is authenticated
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // If user is signed up, redirect to dashboard
+  if (user) {
+    redirect("/dashboard")
+  }
+
   return (
     <div className="min-h-screen bg-background relative pb-0">
       <Header />
