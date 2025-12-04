@@ -39,9 +39,11 @@ export function DocumentViewer({
 
         if (rect) {
           setSelectedText(text)
+          // Use getBoundingClientRect which gives viewport-relative coordinates
+          // For fixed positioning, we don't need to add window.scrollY
           setToolbarPosition({
             x: rect.left + rect.width / 2,
-            y: rect.top + window.scrollY,
+            y: rect.top, // Use viewport-relative top position
           })
           setShowToolbar(true)
         }

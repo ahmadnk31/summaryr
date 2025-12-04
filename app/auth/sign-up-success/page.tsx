@@ -6,26 +6,52 @@ import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { Mail, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { createClient } from "@/lib/supabase/client"
 
 export default function Page() {
   const [isResending, setIsResending] = useState(false)
   const [email, setEmail] = useState("")
 
-  // Get email from URL params or localStorage
+  // Get email from URL params or localStorage and check if user is verified
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search)
-      const emailParam = params.get("email")
-      if (emailParam) {
-        setEmail(emailParam)
-        localStorage.setItem("signup_email", emailParam)
-      } else {
-        const storedEmail = localStorage.getItem("signup_email")
-        if (storedEmail) {
-          setEmail(storedEmail)
+    const checkAuth = async () => {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search)
+        const emailParam = params.get("email")
+        if (emailParam) {
+          setEmail(emailParam)
+          localStorage.setItem("signup_email", emailParam)
+        } else {
+          const storedEmail = localStorage.getItem("signup_email")
+          if (storedEmail) {
+            setEmail(storedEmail)
+          }
+        }
+
+        // Check if user is authenticated and verified, redirect to dashboard
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (user) {
+          // Check if user is verified in email_verifications table
+          const { data: verification } = await supabase
+            .from("email_verifications")
+            .select("verified")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+          // If verified, redirect to dashboard
+          if (verification?.verified === true) {
+            window.location.href = "/dashboard"
+            return
+          }
         }
       }
     }
+    
+    checkAuth()
   }, [])
 
   const handleResendVerification = async () => {

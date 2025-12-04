@@ -14,14 +14,29 @@ export default function VerifyEmailRequiredPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Get user email
+    // Get user email and check if verified
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (user?.email) {
         setEmail(user.email)
         // Store in localStorage for resend functionality
         if (typeof window !== "undefined") {
           localStorage.setItem("signup_email", user.email)
+        }
+
+        // Check if user is verified in email_verifications table
+        const { data: verification } = await supabase
+          .from("email_verifications")
+          .select("verified")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        // If verified, redirect to dashboard
+        if (verification?.verified === true) {
+          window.location.href = "/dashboard"
+          return
         }
       }
       setIsLoading(false)

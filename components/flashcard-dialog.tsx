@@ -96,7 +96,7 @@ export function FlashcardDialog({ open, onOpenChange, documentId, selectedText, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg md:max-w-2xl">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg md:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Generate Flashcards</DialogTitle>
           <DialogDescription>
@@ -104,7 +104,7 @@ export function FlashcardDialog({ open, onOpenChange, documentId, selectedText, 
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto flex-1 pr-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="quantity">Number of Flashcards</Label>
@@ -142,7 +142,7 @@ export function FlashcardDialog({ open, onOpenChange, documentId, selectedText, 
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder={selectedText ? "Selected text will be used..." : "Enter text or use document content..."}
-              className="mt-2 min-h-32"
+              className="mt-2 min-h-32 max-h-48 overflow-y-auto break-words"
               disabled={isGenerating}
             />
             {selectedText && (
@@ -152,7 +152,7 @@ export function FlashcardDialog({ open, onOpenChange, documentId, selectedText, 
             )}
             {!selectedText && documentText && (
               <p className="text-xs text-muted-foreground mt-1">
-                Using document content (first 2000 chars). You can edit it above.
+                Using full document content. You can edit it above.
               </p>
             )}
           </div>
@@ -175,28 +175,29 @@ export function FlashcardDialog({ open, onOpenChange, documentId, selectedText, 
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button
-              onClick={handleGenerate}
-              className="flex-1"
-              disabled={!inputText?.trim() || isGenerating}
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Generate {quantity} Flashcard{quantity > 1 ? "s" : ""}
-                </>
-              )}
-            </Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isGenerating} className="w-full sm:w-auto">
-              Cancel
-            </Button>
-          </div>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t flex-shrink-0">
+          <Button
+            onClick={handleGenerate}
+            className="flex-1"
+            disabled={!inputText?.trim() || isGenerating}
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Generate {quantity} Flashcard{quantity > 1 ? "s" : ""}
+              </>
+            )}
+          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isGenerating} className="w-full sm:w-auto">
+            Cancel
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

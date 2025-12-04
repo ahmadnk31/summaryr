@@ -55,15 +55,15 @@ export function HeroSection() {
           >
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight" style={{ contentVisibility: 'auto' }}>
               <span className="bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
-                Transform Documents into
+                AI Document Summarizer
               </span>
               <br />
               <span className="bg-gradient-to-r from-primary via-primary to-primary/80 bg-clip-text text-transparent">
-                Study Materials
+                That Transforms Your Documents
               </span>
             </h1>
             <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Upload PDFs, DOCX, or EPUB files and instantly generate AI-powered summaries, flashcards, practice questions, and explanations to supercharge your learning.
+              The best AI document summarizer tool. Upload PDFs, DOCX, or EPUB files and instantly generate AI-powered summaries, flashcards, practice questions, and explanations. Our intelligent document summarizer helps students and professionals learn faster.
             </p>
           </motion.div>
 
@@ -103,9 +103,9 @@ export function HeroSection() {
           >
             {[
               { icon: FileText, text: "PDF, DOCX, EPUB" },
-              { icon: Sparkles, text: "AI-Powered" },
+              { icon: Sparkles, text: "AI Document Summarizer" },
               { icon: BookOpen, text: "Study Tools" },
-              { icon: Zap, text: "Instant Generation" }
+              { icon: Zap, text: "Instant Summaries" }
             ].map((feature, index) => (
               <div
                 key={index}
@@ -125,7 +125,7 @@ export function HeroSection() {
             className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 pt-8 max-w-3xl w-full"
           >
             {[
-              "Generate summaries in seconds",
+              "AI document summarizer in seconds",
               "Create interactive flashcards",
               "Practice with AI questions"
             ].map((benefit, index) => (

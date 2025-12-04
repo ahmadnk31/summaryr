@@ -30,11 +30,14 @@ export function QuestionDialog({ open, onOpenChange, documentId, selectedText, d
   // Initialize inputText when dialog opens
   useEffect(() => {
     if (open) {
-      if (selectedText) {
+      // Use selected text if available, otherwise use full document text
+      if (selectedText && selectedText.trim()) {
         setInputText(selectedText)
-      } else if (documentText) {
-        // Use first 2000 chars of document if no selection
-        setInputText(documentText.substring(0, 2000))
+      } else if (documentText && documentText.trim()) {
+        // Use full document text if no selection
+        setInputText(documentText)
+      } else {
+        setInputText("")
       }
       setQuantity(1)
       setQuestionType("short_answer")
@@ -96,7 +99,7 @@ export function QuestionDialog({ open, onOpenChange, documentId, selectedText, d
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg md:max-w-2xl">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg md:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Generate Questions</DialogTitle>
           <DialogDescription>
@@ -104,7 +107,7 @@ export function QuestionDialog({ open, onOpenChange, documentId, selectedText, d
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto flex-1 pr-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="quantity">Number of Questions</Label>
@@ -142,7 +145,7 @@ export function QuestionDialog({ open, onOpenChange, documentId, selectedText, d
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder={selectedText ? "Selected text will be used..." : "Enter text or use document content..."}
-              className="mt-2 min-h-32"
+              className="mt-2 min-h-32 max-h-48 overflow-y-auto break-words"
               disabled={isGenerating}
             />
             {selectedText && (
@@ -152,7 +155,7 @@ export function QuestionDialog({ open, onOpenChange, documentId, selectedText, d
             )}
             {!selectedText && documentText && (
               <p className="text-xs text-muted-foreground mt-1">
-                Using document content (first 2000 chars). You can edit it above.
+                Using full document content. You can edit it above.
               </p>
             )}
           </div>
@@ -175,12 +178,14 @@ export function QuestionDialog({ open, onOpenChange, documentId, selectedText, d
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button
-              onClick={handleGenerate}
-              className="flex-1"
-              disabled={!inputText?.trim() || isGenerating}
-            >
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t flex-shrink-0">
+          <Button
+            onClick={handleGenerate}
+            className="flex-1"
+            disabled={!inputText?.trim() || isGenerating}
+          >
             {isGenerating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -189,14 +194,13 @@ export function QuestionDialog({ open, onOpenChange, documentId, selectedText, d
             ) : (
               <>
                 <Sparkles className="mr-2 h-4 w-4" />
-                  Generate {quantity} Question{quantity > 1 ? "s" : ""}
+                Generate {quantity} Question{quantity > 1 ? "s" : ""}
               </>
             )}
           </Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isGenerating} className="w-full sm:w-auto">
-              Cancel
-            </Button>
-          </div>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isGenerating} className="w-full sm:w-auto">
+            Cancel
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

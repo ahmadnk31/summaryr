@@ -38,12 +38,16 @@ export async function updateSession(request: NextRequest) {
     "/terms-of-use",
     "/privacy-policy",
     "/support",
+    "/sitemap.xml",
+    "/robots.txt",
   ]
   // API routes and auth routes are always public
   const isPublicRoute = 
     publicRoutes.includes(request.nextUrl.pathname) || 
     request.nextUrl.pathname.startsWith("/auth") ||
-    request.nextUrl.pathname.startsWith("/api")
+    request.nextUrl.pathname.startsWith("/api") ||
+    request.nextUrl.pathname === "/sitemap.xml" ||
+    request.nextUrl.pathname === "/robots.txt"
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()

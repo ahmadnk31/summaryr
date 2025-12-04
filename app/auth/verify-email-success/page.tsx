@@ -2,8 +2,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2 } from "lucide-react"
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
 
-export default function VerifyEmailSuccessPage() {
+export default async function VerifyEmailSuccessPage() {
+  // Check if user is authenticated and verified, redirect to dashboard
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (user) {
+    // Check if user is verified
+    const { data: verification } = await supabase
+      .from("email_verifications")
+      .select("verified")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    // If verified, redirect to dashboard
+    if (verification?.verified === true) {
+      redirect("/dashboard")
+    }
+  }
+
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">

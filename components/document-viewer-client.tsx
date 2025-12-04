@@ -6,6 +6,7 @@ import { DashboardNavbar } from "@/components/dashboard-navbar"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
 import { BookOpen, FileQuestion, FileText, StickyNote, Lightbulb, Plus, MessageCircle } from "lucide-react"
 import type { Document } from "@/lib/types"
 import { FlashcardDialog } from "@/components/flashcard-dialog"
@@ -40,27 +41,37 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
   }, [])
 
   const handleCreateFlashcard = (text: string) => {
-    setSelectedText(text)
+    // Use full document text if no text is selected
+    const textToUse = text.trim() || document.extracted_text || ""
+    setSelectedText(textToUse)
     setFlashcardDialogOpen(true)
   }
 
   const handleCreateQuestion = (text: string) => {
-    setSelectedText(text)
+    // Use full document text if no text is selected
+    const textToUse = text.trim() || document.extracted_text || ""
+    setSelectedText(textToUse)
     setQuestionDialogOpen(true)
   }
 
   const handleSummarize = (text: string) => {
-    setSelectedText(text)
+    // Use full document text if no text is selected
+    const textToUse = text.trim() || document.extracted_text || ""
+    setSelectedText(textToUse)
     setSummaryDialogOpen(true)
   }
 
   const handleExplain = (text: string) => {
-    setSelectedText(text)
+    // Use full document text if no text is selected
+    const textToUse = text.trim() || document.extracted_text || ""
+    setSelectedText(textToUse)
     setExplainDialogOpen(true)
   }
 
   const handleCreateNote = (text: string, start?: number, end?: number) => {
-    setSelectedText(text)
+    // Use full document text if no text is selected
+    const textToUse = text.trim() || document.extracted_text || ""
+    setSelectedText(textToUse)
     setNotePosition({ start, end })
     setNoteDialogOpen(true)
   }
@@ -78,8 +89,9 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
       />
 
       <main className="container mx-auto px-4 py-4 sm:py-6 max-w-7xl">
-        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_350px]">
-          <div className="order-2 lg:order-1 min-w-0">
+        {/* Mobile layout - stacked */}
+        <div className="block lg:hidden space-y-4 sm:space-y-6">
+          <div>
             <DocumentViewer
               document={document}
               onCreateFlashcard={handleCreateFlashcard}
@@ -89,9 +101,132 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
               onCreateNote={handleCreateNote}
             />
           </div>
+          <Card className="h-auto flex flex-col w-full">
+            <CardHeader className="flex-shrink-0">
+              <CardTitle className="text-base sm:text-lg">Study Materials</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto max-h-[600px]">
+              {isMounted ? (
+                <Tabs defaultValue="chat" className="w-full">
+                  <TabsList className="flex w-full sm:grid sm:grid-cols-6 overflow-x-auto sticky top-0 bg-background z-10 mb-4 h-auto scrollbar-hide">
+                  <TabsTrigger value="chat" className="text-[10px] sm:text-xs p-1.5 sm:p-2 flex-shrink-0">
+                    <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="flashcards" className="text-[10px] sm:text-xs p-1.5 sm:p-2 flex-shrink-0">
+                    <BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="questions" className="text-[10px] sm:text-xs p-1.5 sm:p-2 flex-shrink-0">
+                    <FileQuestion className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="summaries" className="text-[10px] sm:text-xs p-1.5 sm:p-2 flex-shrink-0">
+                    <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="explanations" className="text-[10px] sm:text-xs p-1.5 sm:p-2 flex-shrink-0">
+                    <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="notes" className="text-[10px] sm:text-xs p-1.5 sm:p-2 flex-shrink-0">
+                    <StickyNote className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </TabsTrigger>
+                </TabsList>
 
-          <div className="order-1 lg:order-2 min-w-0">
-            <Card className="h-auto lg:h-[calc(100vh-8rem)] flex flex-col w-full">
+                <TabsContent value="chat" className="mt-0 h-[400px] sm:h-[500px]">
+                  <DocumentChat documentId={document.id} documentText={document.extracted_text} />
+                </TabsContent>
+
+                <TabsContent value="flashcards" className="mt-0 space-y-3">
+                  <Button
+                    onClick={() => handleCreateFlashcard("")}
+                    variant="outline"
+                    className="w-full"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Flashcard
+                  </Button>
+                  <FlashcardList documentId={document.id} refreshKey={refreshKey} />
+                </TabsContent>
+
+                <TabsContent value="questions" className="mt-0 space-y-3">
+                  <Button
+                    onClick={() => handleCreateQuestion("")}
+                    variant="outline"
+                    className="w-full"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Question
+                  </Button>
+                  <QuestionList documentId={document.id} refreshKey={refreshKey} />
+                </TabsContent>
+
+                <TabsContent value="summaries" className="mt-0 space-y-3">
+                  <Button
+                    onClick={() => handleSummarize("")}
+                    variant="outline"
+                    className="w-full"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Summary
+                  </Button>
+                  <SummaryList documentId={document.id} refreshKey={refreshKey} />
+                </TabsContent>
+
+                <TabsContent value="explanations" className="mt-0 space-y-3">
+                  <Button
+                    onClick={() => handleExplain("")}
+                    variant="outline"
+                    className="w-full"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Explanation
+                  </Button>
+                  <ExplanationList documentId={document.id} refreshKey={refreshKey} />
+                </TabsContent>
+
+                <TabsContent value="notes" className="mt-0 space-y-3">
+                  <Button
+                    onClick={() => handleCreateNote("")}
+                    variant="outline"
+                    className="w-full"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Note
+                  </Button>
+                  <NoteList documentId={document.id} refreshKey={refreshKey} />
+                </TabsContent>
+              </Tabs>
+              ) : (
+                <div className="flex items-center justify-center h-32">
+                  <p className="text-sm text-muted-foreground">Loading...</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Desktop layout - resizable */}
+        <div className="hidden lg:block h-[calc(100vh-4rem)]">
+          <ResizablePanelGroup direction="horizontal" className="h-full">
+            <ResizablePanel defaultSize={65} minSize={40} maxSize={80} className="min-w-0">
+              <div className="h-full overflow-auto pr-2 sm:pr-4">
+                <DocumentViewer
+                  document={document}
+                  onCreateFlashcard={handleCreateFlashcard}
+                  onCreateQuestion={handleCreateQuestion}
+                  onSummarize={handleSummarize}
+                  onExplain={handleExplain}
+                  onCreateNote={handleCreateNote}
+                />
+              </div>
+            </ResizablePanel>
+            
+            <ResizableHandle withHandle />
+            
+            <ResizablePanel defaultSize={35} minSize={20} maxSize={60} className="min-w-0">
+            <Card className="h-full flex flex-col w-full">
               <CardHeader className="flex-shrink-0">
                 <CardTitle className="text-base sm:text-lg">Study Materials</CardTitle>
               </CardHeader>
@@ -195,7 +330,8 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
                 )}
               </CardContent>
             </Card>
-          </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
         </div>
       </main>
 
@@ -204,7 +340,7 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
         onOpenChange={setFlashcardDialogOpen}
         documentId={document.id}
         selectedText={selectedText}
-        documentText={document.extracted_text}
+        documentText={document.extracted_text || ""}
         onSuccess={handleSuccess}
       />
 
@@ -213,7 +349,7 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
         onOpenChange={setQuestionDialogOpen}
         documentId={document.id}
         selectedText={selectedText}
-        documentText={document.extracted_text}
+        documentText={document.extracted_text || ""}
         onSuccess={handleSuccess}
       />
 
@@ -222,6 +358,7 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
         onOpenChange={setSummaryDialogOpen}
         documentId={document.id}
         selectedText={selectedText}
+        documentText={document.extracted_text || ""}
         onSuccess={handleSuccess}
       />
 
@@ -230,6 +367,7 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
         onOpenChange={setExplainDialogOpen}
         documentId={document.id}
         selectedText={selectedText}
+        documentText={document.extracted_text || ""}
         onSuccess={handleSuccess}
       />
 
