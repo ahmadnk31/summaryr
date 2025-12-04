@@ -7,6 +7,7 @@ import { BookOpen, FileQuestion, FileText, StickyNote, Lightbulb } from "lucide-
 interface TextSelectionToolbarProps {
   selectedText: string
   position: { x: number; y: number }
+  containerRef?: React.RefObject<HTMLElement>
   onCreateFlashcard: () => void
   onCreateQuestion: () => void
   onSummarize: () => void
@@ -17,6 +18,7 @@ interface TextSelectionToolbarProps {
 export function TextSelectionToolbar({
   selectedText,
   position,
+  containerRef,
   onCreateFlashcard,
   onCreateQuestion,
   onSummarize,
@@ -29,50 +31,86 @@ export function TextSelectionToolbar({
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    // Get actual toolbar dimensions if available
-    const toolbarElement = toolbarRef.current
-    const toolbarWidth = toolbarElement?.offsetWidth || 320
-    const toolbarHeight = toolbarElement?.offsetHeight || 50
-    const padding = 16
-    const viewportWidth = window.innerWidth
-    const viewportHeight = window.innerHeight
-
-    // Adjust horizontal position to stay within viewport
-    const maxLeft = viewportWidth - toolbarWidth / 2 - padding
-    const minLeft = toolbarWidth / 2 + padding
-    const adjustedX = Math.max(minLeft, Math.min(position.x, maxLeft))
-
-    // Adjust vertical position to stay within viewport
-    const spaceAbove = position.y
-    const spaceBelow = viewportHeight - position.y
-    
-    // Determine if toolbar should be above or below selection
-    // When showing above, transform moves it up by 120% of its height
-    const spaceNeededAbove = toolbarHeight * 1.2 + padding
-    const showAbove = spaceAbove >= spaceNeededAbove
-    
-    // Adjust Y position based on available space
-    let adjustedY = position.y
-    if (showAbove) {
-      // Position above - no adjustment needed, transform handles it
-      adjustedY = position.y
-    } else {
-      // Position below - transform moves it down by 20%
-      if (spaceBelow < toolbarHeight * 1.2 + padding) {
-        // Not enough space below, position at bottom of viewport
-        adjustedY = viewportHeight - toolbarHeight - padding
-      } else {
-        // Enough space below, position normally
-        adjustedY = position.y
+    // Use requestAnimationFrame to ensure DOM is updated before calculating dimensions
+    requestAnimationFrame(() => {
+      // Get actual toolbar dimensions if available
+      const toolbarElement = toolbarRef.current
+      if (!toolbarElement) return
+      
+      const toolbarWidth = toolbarElement.offsetWidth || 320
+      const toolbarHeight = toolbarElement.offsetHeight || 50
+      const padding = 16
+      
+      // Get container bounds if available, otherwise use viewport
+      let containerRect: DOMRect | null = null
+      if (containerRef?.current) {
+        containerRect = containerRef.current.getBoundingClientRect()
       }
-    }
+      
+      const boundsWidth = containerRect ? containerRect.width : window.innerWidth
+      const boundsHeight = containerRect ? containerRect.height : window.innerHeight
+      const boundsLeft = containerRect ? containerRect.left : 0
+      const boundsTop = containerRect ? containerRect.top : 0
+      const boundsRight = containerRect ? containerRect.right : window.innerWidth
+      const boundsBottom = containerRect ? containerRect.bottom : window.innerHeight
 
-    setAdjustedPosition({ 
-      x: adjustedX, 
-      y: adjustedY,
-      showAbove 
+      // Adjust horizontal position to stay within container/viewport
+      // Ensure toolbar is always fully visible horizontally
+      const halfToolbarWidth = toolbarWidth / 2
+      const relativeX = position.x - boundsLeft
+      const maxLeft = boundsWidth - halfToolbarWidth - padding
+      const minLeft = halfToolbarWidth + padding
+      const adjustedRelativeX = Math.max(minLeft, Math.min(relativeX, maxLeft))
+      const adjustedX = adjustedRelativeX + boundsLeft
+
+      // Adjust vertical position to stay within container/viewport
+      const relativeY = position.y - boundsTop
+      const spaceAbove = relativeY
+      const spaceBelow = boundsHeight - relativeY
+      
+      // Determine if toolbar should be above or below selection
+      // When showing above, transform moves it up by 120% of its height
+      const spaceNeededAbove = toolbarHeight * 1.2 + padding
+      const spaceNeededBelow = toolbarHeight * 1.2 + padding
+      const showAbove = spaceAbove >= spaceNeededAbove
+      
+      // Adjust Y position based on available space
+      let adjustedRelativeY = relativeY
+      
+      if (showAbove) {
+        // Position above - ensure it doesn't go above container
+        const minY = toolbarHeight * 1.2 + padding
+        adjustedRelativeY = Math.max(minY, relativeY)
+      } else {
+        // Position below - ensure it doesn't go below container
+        const maxY = boundsHeight - toolbarHeight * 1.2 - padding
+        if (spaceBelow < spaceNeededBelow) {
+          // Not enough space below, try to position above if possible
+          if (spaceAbove >= spaceNeededAbove) {
+            adjustedRelativeY = Math.max(toolbarHeight * 1.2 + padding, relativeY)
+          } else {
+            // Not enough space either way, position at bottom of container
+            adjustedRelativeY = Math.max(padding, boundsHeight - toolbarHeight * 1.2 - padding)
+          }
+        } else {
+          // Enough space below, position normally but clamp to container
+          adjustedRelativeY = Math.min(maxY, Math.max(padding, relativeY))
+        }
+      }
+      
+      const adjustedY = adjustedRelativeY + boundsTop
+
+      // Final check: ensure toolbar is completely within bounds
+      const finalX = Math.max(boundsLeft + padding + halfToolbarWidth, Math.min(adjustedX, boundsRight - padding - halfToolbarWidth))
+      const finalY = Math.max(boundsTop + padding, Math.min(adjustedY, boundsBottom - padding))
+
+      setAdjustedPosition({ 
+        x: finalX, 
+        y: finalY,
+        showAbove 
+      })
     })
-  }, [position.x, position.y])
+  }, [position.x, position.y, containerRef])
 
   if (!selectedText) return null
 

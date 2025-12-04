@@ -40,11 +40,16 @@ export default async function DocumentsPage() {
   }
 
   // Fetch all documents
-  const { data: documents } = await supabase
+  const { data: documents, error: documentsError } = await supabase
     .from("documents")
     .select("*")
     .eq("user_id", user.id)
     .order("upload_date", { ascending: false })
+
+  // Handle potential database errors
+  if (documentsError) {
+    console.error("Error fetching documents:", documentsError)
+  }
 
   return (
     <div className="min-h-screen bg-background">
