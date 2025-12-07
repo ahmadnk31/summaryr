@@ -5,6 +5,7 @@ import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Menu } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -21,11 +22,15 @@ export function Header() {
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault()
     setIsOpen(false) // Close the sheet when a link is clicked
-    const targetId = href.substring(1) // Remove '#' from href
-    const targetElement = document.getElementById(targetId)
-    if (targetElement) {
-      targetElement.scrollIntoView({ behavior: "smooth" })
-    }
+    
+    // Use setTimeout to ensure the sheet closes before scrolling
+    setTimeout(() => {
+      const targetId = href.substring(1) // Remove '#' from href
+      const targetElement = document.getElementById(targetId)
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: "smooth", block: "start" })
+      }
+    }, 300) // Wait for sheet close animation
   }
 
   return (
@@ -43,6 +48,18 @@ export function Header() {
               sizes="24px"
             />
             <span className="text-foreground text-xl font-semibold">Summaryr</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide cursor-help">
+                    Beta
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>We're in beta! Use it now for free.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </Link>
           <nav className="hidden md:flex items-center gap-2">
             {navItems.map((item) => (

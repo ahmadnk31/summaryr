@@ -11,139 +11,89 @@ export function HeroSection() {
   const shouldReduceMotion = useReducedMotion()
   
   return (
-    <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-32 md:pt-32 md:pb-40">
-      {/* Animated Gradient Background */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/5" />
-        {!shouldReduceMotion && (
-          <>
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-          </>
-        )}
-        
-        {/* Grid Pattern */}
-        <div 
-          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
-          style={{
-            backgroundImage: `linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px),
-                              linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)`,
-            backgroundSize: "50px 50px"
-          }}
-        />
+    <section className="relative w-full pt-24 pb-20 md:pt-32 md:pb-28 text-center overflow-hidden">
+      {/* Modern gradient background */}
+      <div 
+        className="absolute inset-0 -z-10"
+        style={{
+          background: `
+            radial-gradient(circle 800px at 20% 30%, rgba(147, 51, 234, 0.4), transparent 50%),
+            radial-gradient(circle 600px at 80% 20%, rgba(236, 72, 153, 0.35), transparent 50%),
+            radial-gradient(circle 700px at 50% 80%, rgba(251, 146, 60, 0.3), transparent 50%),
+            radial-gradient(circle 500px at 90% 70%, rgba(168, 85, 247, 0.3), transparent 50%),
+            radial-gradient(circle 600px at 10% 80%, rgba(59, 130, 246, 0.25), transparent 50%)
+          `
+        }}
+      />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl relative">
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.5 }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary mb-6"
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          <span>AI-Powered Study Platform</span>
+        </motion.div>
+
+        <motion.h1 
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 0.1 }}
+          className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent"
+        >
+          Turn Any Document Into
+          <br />
+          <span className="bg-gradient-to-r from-primary via-fuchsia-500 to-orange-400 bg-clip-text text-transparent">
+            Interactive Study Material
+          </span>
+        </motion.h1>
+
+        <motion.p 
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 0.2 }}
+          className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground"
+        >
+          Upload PDFs, DOCX, or EPUBs. Our AI generates summaries, flashcards, and practice questions to help you learn faster and smarter.
+        </motion.p>
+
+        <motion.div 
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 0.3 }}
+          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
+          <Link href="/auth/sign-up" className="w-full sm:w-auto">
+            <Button 
+              size="lg" 
+              className="w-full sm:w-auto px-8 py-6 text-base font-semibold rounded-full bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-300 group"
+            >
+              Get Started For Free
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </Link>
+          <Link href="#features-section" className="w-full sm:w-auto">
+            <Button 
+              variant="ghost" 
+              size="lg"
+              className="w-full sm:w-auto px-8 py-6 text-base font-semibold rounded-full group"
+            >
+              Explore Features
+              <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+            </Button>
+          </Link>
+        </motion.div>
+
+        <motion.div 
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 0.4 }}
+          className="mt-12 text-sm text-muted-foreground"
+        >
+          No credit card required. Start learning instantly.
+        </motion.div>
       </div>
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <div className="flex flex-col items-center text-center space-y-8 md:space-y-12">
-          {/* Badge */}
-          <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>AI-Powered Study Platform</span>
-          </motion.div>
-
-          {/* Main Heading - LCP Element */}
-          <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 0.1 }}
-            className="space-y-4 md:space-y-6 max-w-4xl"
-          >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight" style={{ contentVisibility: 'auto' }}>
-              <span className="bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
-                AI Document Summarizer
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-primary via-primary to-primary/80 bg-clip-text text-transparent">
-                That Transforms Your Documents
-              </span>
-            </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              The best AI document summarizer tool. Upload PDFs, DOCX, or EPUB files and instantly generate AI-powered summaries, flashcards, practice questions, and explanations. Our intelligent document summarizer helps students and professionals learn faster.
-            </p>
-          </motion.div>
-
-          {/* CTA Buttons */}
-          <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 0.2 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto"
-          >
-            <Link href="/auth/sign-up" className="w-full sm:w-auto">
-              <Button 
-                size="lg" 
-                className="w-full sm:w-auto px-8 py-6 text-base md:text-lg font-semibold rounded-full bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-200 group"
-              >
-                Get Started Free
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            <Link href="/auth/login" className="w-full sm:w-auto">
-              <Button 
-                variant="outline" 
-                size="lg"
-                className="w-full sm:w-auto px-8 py-6 text-base md:text-lg font-semibold rounded-full border-2 hover:bg-accent transition-all duration-200"
-              >
-                Sign In
-              </Button>
-            </Link>
-          </motion.div>
-
-          {/* Feature Pills */}
-          <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 0.3 }}
-            className="flex flex-wrap items-center justify-center gap-3 md:gap-4 pt-4"
-          >
-            {[
-              { icon: FileText, text: "PDF, DOCX, EPUB" },
-              { icon: Sparkles, text: "AI Document Summarizer" },
-              { icon: BookOpen, text: "Study Tools" },
-              { icon: Zap, text: "Instant Summaries" }
-            ].map((feature, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border/50 backdrop-blur-sm hover:bg-muted transition-colors"
-              >
-                <feature.icon className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">{feature.text}</span>
-              </div>
-            ))}
-          </motion.div>
-
-          {/* Key Benefits */}
-          <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 0.4 }}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 pt-8 max-w-3xl w-full"
-          >
-            {[
-              "AI document summarizer in seconds",
-              "Create interactive flashcards",
-              "Practice with AI questions"
-            ].map((benefit, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 p-4 rounded-lg bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card transition-colors"
-              >
-                <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
-                <span className="text-sm font-medium text-foreground">{benefit}</span>
-      </div>
-            ))}
-          </motion.div>
-      </div>
-      </div>
-
-      {/* Decorative Elements */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl -z-10 hidden lg:block" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10 hidden lg:block" />
     </section>
   )
 }

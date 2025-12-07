@@ -11,6 +11,16 @@ import { Label } from "@/components/ui/label"
 import type { Question } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface QuestionListProps {
   documentId: string
@@ -29,6 +39,8 @@ export function QuestionList({ documentId, refreshKey }: QuestionListProps) {
   const [userAnswers, setUserAnswers] = useState<Map<string, string>>(new Map())
   const [submittedAnswers, setSubmittedAnswers] = useState<Set<string>>(new Set())
   const [answerResults, setAnswerResults] = useState<Map<string, "correct" | "incorrect">>(new Map())
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [questionToDelete, setQuestionToDelete] = useState<string | null>(null)
 
   useEffect(() => {
     loadQuestions()
@@ -48,9 +60,18 @@ export function QuestionList({ documentId, refreshKey }: QuestionListProps) {
     }
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteClick = (id: string) => {
+    setQuestionToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!questionToDelete) return
+
     const supabase = createClient()
-    await supabase.from("questions").delete().eq("id", id)
+    await supabase.from("questions").delete().eq("id", questionToDelete)
+    setDeleteDialogOpen(false)
+    setQuestionToDelete(null)
     loadQuestions()
   }
 
@@ -473,7 +494,7 @@ export function QuestionList({ documentId, refreshKey }: QuestionListProps) {
                     </Button>
                   )}
                 </div>
-                <Button size="sm" variant="ghost" onClick={() => handleDelete(q.id)} className="text-destructive hover:text-destructive">
+                <Button size="sm" variant="ghost" onClick={() => handleDeleteClick(q.id)} className="text-destructive hover:text-destructive">
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -481,6 +502,23 @@ export function QuestionList({ documentId, refreshKey }: QuestionListProps) {
           </Card>
         )
       })}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Question?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this question.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -164,58 +164,64 @@ export default async function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background relative pb-0">
-      <Header />
-      <div className="relative z-10">
-        <main className="max-w-[1320px] mx-auto relative">
-          {/* Hero section - LCP element */}
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="relative isolate overflow-hidden">
+        <div className="hero-gradient absolute inset-0 -z-10" />
+        <Header />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <HeroSection />
-          {/* Dashboard Preview Wrapper */}
           <div className="relative -mt-32 md:-mt-48 lg:-mt-64 mb-16 md:mb-24 lg:mb-32">
             <AnimatedSection>
-              <div className="flex justify-center">
-                <div className="relative w-full max-w-5xl px-4">
-                  <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-2 shadow-2xl">
-                    <DashboardPreview />
-                  </div>
+              <div className="relative w-full max-w-5xl mx-auto px-4">
+                <div className="rounded-2xl border border-border/20 bg-card/30 backdrop-blur-xl p-2 shadow-2xl shadow-primary/5">
+                  <DashboardPreview />
                 </div>
               </div>
             </AnimatedSection>
           </div>
         </main>
-        <AnimatedSection className="relative z-10 max-w-[1320px] mx-auto px-6" delay={0.1}>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20 md:space-y-32 pb-20 md:pb-32">
+        <AnimatedSection delay={0.1}>
           <SocialProof />
         </AnimatedSection>
-        <AnimatedSection id="features-section" className="relative z-10 max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 mt-20 md:mt-32" delay={0.2}>
-          <BentoSection />
-        </AnimatedSection>
-        <AnimatedSection className="relative z-10 max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 mt-20 md:mt-32" delay={0.2}>
+
+        <div className="relative">
+          <div className="section-gradient absolute -inset-x-32 -inset-y-24 -z-10" />
+          <AnimatedSection id="features-section" delay={0.2}>
+            <BentoSection />
+          </AnimatedSection>
+        </div>
+
+        <AnimatedSection delay={0.2}>
           <LargeTestimonial />
         </AnimatedSection>
-        <AnimatedSection
-          id="pricing-section"
-          className="relative z-10 max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 mt-20 md:mt-32"
-          delay={0.2}
-        >
-          <PricingSection />
-        </AnimatedSection>
-        <AnimatedSection
-          id="testimonials-section"
-          className="relative z-10 max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 mt-20 md:mt-32"
-          delay={0.2}
-        >
+
+        <div className="relative">
+          <div className="section-gradient absolute -inset-x-32 -inset-y-48 -z-10" />
+          <AnimatedSection id="pricing-section" delay={0.2}>
+            <PricingSection />
+          </AnimatedSection>
+        </div>
+
+        <AnimatedSection id="testimonials-section" delay={0.2}>
           <TestimonialGridSection />
         </AnimatedSection>
-        <AnimatedSection id="faq-section" className="relative z-10 max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 mt-20 md:mt-32" delay={0.2}>
-          <FAQSection />
-        </AnimatedSection>
-        <AnimatedSection className="relative z-10 max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 mt-20 md:mt-32" delay={0.2}>
+
+        <div className="relative">
+          <div className="section-gradient absolute -inset-x-32 -inset-y-48 -z-10" />
+          <AnimatedSection id="faq-section" delay={0.2}>
+            <FAQSection />
+          </AnimatedSection>
+        </div>
+
+        <AnimatedSection delay={0.2}>
           <CTASection />
         </AnimatedSection>
-        <AnimatedSection className="relative z-10 max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 mt-20 md:mt-32" delay={0.2}>
-          <FooterSection />
-        </AnimatedSection>
       </div>
+
+      <FooterSection />
     </div>
   )
 }

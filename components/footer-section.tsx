@@ -5,83 +5,86 @@ import Link from "next/link"
 import Image from "next/image"
 
 export function FooterSection() {
+  const socialLinks = [
+    { icon: Twitter, href: "#", label: "Twitter" },
+    { icon: Github, href: "https://github.com/ahmadnk31/summaryr", label: "GitHub" },
+    { icon: Linkedin, href: "#", label: "LinkedIn" },
+  ]
+
+  const footerLinks = [
+    {
+      title: "Product",
+      links: [
+        { label: "Features", href: "#features" },
+        { label: "Pricing", href: "#pricing" },
+        { label: "Dashboard", href: "/dashboard" },
+      ],
+    },
+    {
+      title: "Company",
+      links: [
+        { label: "About Us", href: "/about-us" },
+        { label: "Contact", href: "/contact" },
+      ],
+    },
+    {
+      title: "Legal",
+      links: [
+        { label: "Terms of Use", href: "/terms-of-use" },
+        { label: "Privacy Policy", href: "/privacy-policy" },
+        { label: "Support", href: "/support" },
+      ],
+    },
+  ]
+
   return (
-    <footer className="w-full max-w-[1320px] mx-auto px-5 flex flex-col py-10 md:py-[70px]">
-      <div className="flex flex-col md:flex-row justify-between items-start gap-8 md:gap-0">
-        {/* Left Section: Logo, Description, Social Links */}
-      <div className="flex flex-col justify-start items-start gap-8 p-4 md:p-8">
-        <Link href="/" className="flex gap-3 items-center justify-center">
-          <Image src="/logo.png" alt="Summaryr Logo" width={24} height={24} className="h-6 w-6" />
-          <div className="text-center text-foreground text-xl font-semibold leading-4">Summaryr</div>
-        </Link>
-        <p className="text-foreground/90 text-sm font-medium leading-[18px] text-left">
-          Transform documents into study materials
-        </p>
-        <div className="flex justify-start items-start gap-3">
-          <a href="#" aria-label="Twitter" className="w-4 h-4 flex items-center justify-center">
-            <Twitter className="w-full h-full text-muted-foreground" />
-          </a>
-          <a href="https://github.com/ahmadnk31/summaryr" aria-label="GitHub" className="w-4 h-4 flex items-center justify-center">
-            <Github className="w-full h-full text-muted-foreground" />
-          </a>
-          <a href="#" aria-label="LinkedIn" className="w-4 h-4 flex items-center justify-center">
-            <Linkedin className="w-full h-full text-muted-foreground" />
-          </a>
-        </div>
-      </div>
-      {/* Right Section: Product, Company, Resources */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 p-4 md:p-8 w-full md:w-auto">
-        <div className="flex flex-col justify-start items-start gap-3">
-          <h3 className="text-muted-foreground text-sm font-medium leading-5">Product</h3>
-          <div className="flex flex-col justify-end items-start gap-2">
-            <Link href="#features-section" className="text-foreground text-sm font-normal leading-5 hover:underline">
-              Features
+    <footer className="bg-background/50 border-t border-border/20">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="flex flex-col gap-4 md:col-span-1">
+            <Link href="/" className="flex items-center gap-2">
+              <Image src="/logo.svg" alt="Summaryr Logo" width={28} height={28} />
+              <span className="text-xl font-bold text-foreground">Summaryr</span>
             </Link>
-            <Link href="#pricing-section" className="text-foreground text-sm font-normal leading-5 hover:underline">
-              Pricing
-            </Link>
-            <a href="#" className="text-foreground text-sm font-normal leading-5 hover:underline">
-              Document Upload
-            </a>
-            <a href="#" className="text-foreground text-sm font-normal leading-5 hover:underline">
-              AI Summaries
-            </a>
-            <a href="#" className="text-foreground text-sm font-normal leading-5 hover:underline">
-              Flashcards & Questions
-            </a>
+            <p className="text-muted-foreground">
+              Study smarter, not harder.
+            </p>
+            <div className="flex gap-3">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={social.label}
+                >
+                  <social.icon className="w-5 h-5" />
+                </a>
+              ))}
+            </div>
           </div>
+          {footerLinks.map((section) => (
+            <div key={section.title}>
+              <h3 className="font-semibold text-foreground mb-4">{section.title}</h3>
+              <ul className="space-y-2">
+                {section.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <div className="flex flex-col justify-start items-start gap-3">
-          <h3 className="text-muted-foreground text-sm font-medium leading-5">Company</h3>
-          <div className="flex flex-col justify-center items-start gap-2">
-            <Link href="/about-us" className="text-foreground text-sm font-normal leading-5 hover:underline">
-              About us
-            </Link>
-            <Link href="/contact" className="text-foreground text-sm font-normal leading-5 hover:underline">
-              Contact
-            </Link>
-          </div>
+        <div className="mt-12 pt-8 border-t border-border/20 text-center text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} Summaryr. All rights reserved.</p>
         </div>
-        <div className="flex flex-col justify-start items-start gap-3">
-          <h3 className="text-muted-foreground text-sm font-medium leading-5">Resources</h3>
-          <div className="flex flex-col justify-center items-start gap-2">
-            <Link href="/terms-of-use" className="text-foreground text-sm font-normal leading-5 hover:underline">
-              Terms of use
-            </Link>
-            <Link href="/privacy-policy" className="text-foreground text-sm font-normal leading-5 hover:underline">
-              Privacy Policy
-            </Link>
-            <Link href="/support" className="text-foreground text-sm font-normal leading-5 hover:underline">
-              Support
-            </Link>
-          </div>
-        </div>
-      </div>
-      </div>
-      <div className="w-full border-t border-border/40 mt-8 pt-8">
-        <p className="text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Summaryr. All rights reserved.
-        </p>
       </div>
     </footer>
   )

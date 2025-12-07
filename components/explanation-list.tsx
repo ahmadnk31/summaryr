@@ -8,6 +8,16 @@ import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
 import type { Explanation } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface ExplanationListProps {
   documentId: string
@@ -16,6 +26,8 @@ interface ExplanationListProps {
 
 export function ExplanationList({ documentId, refreshKey }: ExplanationListProps) {
   const [explanations, setExplanations] = useState<Explanation[]>([])
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [explanationToDelete, setExplanationToDelete] = useState<string | null>(null)
 
   useEffect(() => {
     loadExplanations()
@@ -32,9 +44,18 @@ export function ExplanationList({ documentId, refreshKey }: ExplanationListProps
     if (data) setExplanations(data)
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteClick = (id: string) => {
+    setExplanationToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!explanationToDelete) return
+
     const supabase = createClient()
-    await supabase.from("explanations").delete().eq("id", id)
+    await supabase.from("explanations").delete().eq("id", explanationToDelete)
+    setDeleteDialogOpen(false)
+    setExplanationToDelete(null)
     loadExplanations()
   }
 
@@ -92,13 +113,30 @@ export function ExplanationList({ documentId, refreshKey }: ExplanationListProps
               </ReactMarkdown>
             </div>
             <div className="flex justify-end mt-4">
-              <Button size="sm" variant="ghost" onClick={() => handleDelete(explanation.id)}>
+              <Button size="sm" variant="ghost" onClick={() => handleDeleteClick(explanation.id)}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </CardContent>
         </Card>
       ))}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Explanation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this explanation.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

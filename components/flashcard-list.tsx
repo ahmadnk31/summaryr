@@ -7,6 +7,16 @@ import { Button } from "@/components/ui/button"
 import { Trash2, RotateCcw, Play, Check, X, ArrowRight, BookOpen } from "lucide-react"
 import type { Flashcard } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface FlashcardListProps {
   documentId: string
@@ -20,6 +30,8 @@ export function FlashcardList({ documentId, refreshKey }: FlashcardListProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [knownCards, setKnownCards] = useState<Set<string>>(new Set())
   const [studyCards, setStudyCards] = useState<Flashcard[]>([])
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [flashcardToDelete, setFlashcardToDelete] = useState<string | null>(null)
 
   useEffect(() => {
     loadFlashcards()
@@ -39,9 +51,18 @@ export function FlashcardList({ documentId, refreshKey }: FlashcardListProps) {
     }
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteClick = (id: string) => {
+    setFlashcardToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!flashcardToDelete) return
+
     const supabase = createClient()
-    await supabase.from("flashcards").delete().eq("id", id)
+    await supabase.from("flashcards").delete().eq("id", flashcardToDelete)
+    setDeleteDialogOpen(false)
+    setFlashcardToDelete(null)
     loadFlashcards()
   }
 
@@ -276,13 +297,30 @@ export function FlashcardList({ documentId, refreshKey }: FlashcardListProps) {
                 <RotateCcw className="h-4 w-4 mr-1" />
                 {flipped.has(card.id) ? "Show Question" : "Show Answer"}
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => handleDelete(card.id)} className="text-destructive hover:text-destructive">
+              <Button size="sm" variant="ghost" onClick={() => handleDeleteClick(card.id)} className="text-destructive hover:text-destructive">
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </CardContent>
         </Card>
       ))}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Flashcard?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this flashcard.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

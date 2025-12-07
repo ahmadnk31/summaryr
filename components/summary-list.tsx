@@ -8,6 +8,16 @@ import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
 import type { Summary } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface SummaryListProps {
   documentId: string
@@ -16,6 +26,8 @@ interface SummaryListProps {
 
 export function SummaryList({ documentId, refreshKey }: SummaryListProps) {
   const [summaries, setSummaries] = useState<Summary[]>([])
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [summaryToDelete, setSummaryToDelete] = useState<string | null>(null)
 
   useEffect(() => {
     loadSummaries()
@@ -32,9 +44,18 @@ export function SummaryList({ documentId, refreshKey }: SummaryListProps) {
     if (data) setSummaries(data)
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteClick = (id: string) => {
+    setSummaryToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!summaryToDelete) return
+
     const supabase = createClient()
-    await supabase.from("summaries").delete().eq("id", id)
+    await supabase.from("summaries").delete().eq("id", summaryToDelete)
+    setDeleteDialogOpen(false)
+    setSummaryToDelete(null)
     loadSummaries()
   }
 
@@ -88,13 +109,30 @@ export function SummaryList({ documentId, refreshKey }: SummaryListProps) {
               </ReactMarkdown>
             </div>
             <div className="flex justify-end mt-4">
-              <Button size="sm" variant="ghost" onClick={() => handleDelete(summary.id)}>
+              <Button size="sm" variant="ghost" onClick={() => handleDeleteClick(summary.id)}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </CardContent>
         </Card>
       ))}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Summary?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this summary.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
