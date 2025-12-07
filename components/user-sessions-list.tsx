@@ -74,6 +74,11 @@ export function UserSessionsList() {
     toast.success("Session link copied to clipboard!")
   }
 
+  const copySessionCode = (code: string) => {
+    navigator.clipboard.writeText(code)
+    toast.success("Session code copied!")
+  }
+
   const deleteSession = async (sessionId: string) => {
     try {
       console.log("Attempting to delete session:", sessionId)
@@ -201,7 +206,7 @@ export function UserSessionsList() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <CardTitle>Your Sessions</CardTitle>
             <CardDescription>
@@ -212,6 +217,7 @@ export function UserSessionsList() {
             variant="outline"
             size="sm"
             onClick={loadSessions}
+            className="w-full sm:w-auto"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
@@ -219,15 +225,15 @@ export function UserSessionsList() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {sessions.map((session) => (
             <div
               key={session.id}
-              className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+              className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-5 border rounded-lg hover:bg-accent/50 transition-colors"
             >
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-semibold">{session.session_name}</h4>
+              <div className="flex-1 space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="font-semibold text-base">{session.session_name}</h4>
                   <Badge variant={session.is_active ? "default" : "secondary"}>
                     {session.is_active ? "Active" : "Ended"}
                   </Badge>
@@ -235,43 +241,51 @@ export function UserSessionsList() {
                     {session.session_type}
                   </Badge>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Users className="w-3 h-3" />
+                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <Users className="w-4 h-4" />
                     {session.participant_count} participant{session.participant_count !== 1 ? "s" : ""}
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4" />
                     {formatDistanceToNow(new Date(session.created_at), { addSuffix: true })}
                   </span>
-                  <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                  <button
+                    onClick={() => copySessionCode(session.session_code)}
+                    className="font-mono text-xs bg-muted px-2.5 py-1.5 rounded hover:bg-muted/80 active:bg-muted/60 transition-colors cursor-pointer inline-flex items-center gap-1.5 group"
+                    title="Click to copy code"
+                  >
                     {session.session_code}
-                  </span>
+                    <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </button>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
                 {session.is_active && (
                   <>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="default"
                       onClick={() => copySessionLink(session.session_code)}
+                      className="flex-1 sm:flex-none"
                     >
                       <Copy className="w-4 h-4 mr-2" />
                       Copy Link
                     </Button>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="default"
                       onClick={() => window.open(`/practice/session/${session.session_code}`, "_blank")}
+                      className="flex-1 sm:flex-none"
                     >
                       Join
                     </Button>
                     <Button
                       variant="destructive"
-                      size="sm"
+                      size="default"
                       onClick={() => endSession(session.id)}
+                      className="flex-1 sm:flex-none"
                     >
                       End
                     </Button>
@@ -279,11 +293,13 @@ export function UserSessionsList() {
                 )}
                 {!session.is_active && (
                   <Button
-                    variant="ghost"
-                    size="sm"
+                    variant="destructive"
+                    size="default"
                     onClick={() => deleteSession(session.id)}
+                    className="w-full sm:w-auto"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
                   </Button>
                 )}
               </div>
