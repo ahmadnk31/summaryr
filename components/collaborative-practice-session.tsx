@@ -17,8 +17,8 @@ type QualityRating = 0 | 3 | 4 | 5
 
 interface Flashcard {
   id: string
-  front: string
-  back: string
+  front_text: string
+  back_text: string
   easiness_factor: number
   interval_days: number
   repetition_count: number
@@ -26,8 +26,8 @@ interface Flashcard {
 
 interface Question {
   id: string
-  question: string
-  answer: string
+  question_text: string
+  answer_text: string
   easiness_factor: number
   interval_days: number
   repetition_count: number
@@ -83,7 +83,11 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
           setSession(updatedSession)
           if (!updatedSession.is_active) {
             setSessionEnded(true)
-            toast.info("Session has ended")
+            toast.info("Host has ended the session")
+            // Redirect to practice page after 2 seconds
+            setTimeout(() => {
+              router.push("/practice")
+            }, 2000)
           }
         }
       )
@@ -101,6 +105,13 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
 
   const loadSession = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error("Please sign in to join the session")
+        router.push("/auth/login")
+        return
+      }
+
       const { data: sessionData, error: sessionError } = await supabase
         .from("practice_sessions")
         .select("*")
@@ -108,10 +119,21 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
         .single()
 
       if (sessionError || !sessionData) {
+        console.error("Session error:", sessionError)
         toast.error("Session not found")
         router.push("/practice")
         return
       }
+
+      // Check if session is still active
+      if (!sessionData.is_active) {
+        toast.error("This session has ended")
+        router.push("/practice")
+        return
+      }
+
+      // Auto-join if not already a participant
+      await ensureParticipant(sessionData.id, user)
 
       setSession(sessionData)
       await loadItems(sessionData)
@@ -123,15 +145,55 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
     }
   }
 
+  const ensureParticipant = async (sessionId: string, user: any) => {
+    try {
+      // Check if already a participant
+      const { data: existing } = await supabase
+        .from("practice_session_participants")
+        .select("id")
+        .eq("session_id", sessionId)
+        .eq("user_id", user.id)
+        .single()
+
+      if (existing) {
+        console.log("Already a participant")
+        return
+      }
+
+      // Add as participant
+      const { error } = await supabase
+        .from("practice_session_participants")
+        .insert({
+          session_id: sessionId,
+          user_id: user.id,
+          display_name: user.email?.split("@")[0] || "Anonymous",
+        })
+
+      if (error) {
+        console.error("Error joining as participant:", error)
+      } else {
+        console.log("Successfully joined as participant")
+        toast.success("Joined session!")
+      }
+    } catch (error) {
+      console.error("Error ensuring participant:", error)
+    }
+  }
+
   const loadItems = async (sessionData: Session) => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        console.error("No user found")
+        return
+      }
 
+      // In collaborative sessions, load items from the HOST's collection
+      // This ensures all participants see the same flashcards/questions
       let query = supabase
         .from(sessionData.session_type)
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", sessionData.host_user_id) // Load host's items, not current user's
 
       if (sessionData.document_id) {
         query = query.eq("document_id", sessionData.document_id)
@@ -139,10 +201,28 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
 
       const { data, error } = await query
 
-      if (error) throw error
+      if (error) {
+        console.error("Error loading items from database:", error)
+        throw error
+      }
+
+      console.log(`Loaded ${data?.length || 0} ${sessionData.session_type} from host's collection`)
+      
+      if (!data || data.length === 0) {
+        const isHost = user.id === sessionData.host_user_id
+        if (isHost) {
+          toast.error(`No ${sessionData.session_type} found. Please create some first.`)
+        } else {
+          toast.error(`The host hasn't created any ${sessionData.session_type} yet.`)
+        }
+        setItems([])
+        return
+      }
+
       setItems((data || []).sort(() => Math.random() - 0.5))
     } catch (error) {
       console.error("Error loading items:", error)
+      toast.error(`Failed to load ${sessionData.session_type}`)
     }
   }
 
@@ -226,15 +306,46 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
   }
 
   const endSession = async () => {
-    if (!session || !userId || userId !== session.host_user_id) return
+    if (!session || !userId || userId !== session.host_user_id) {
+      console.error("Cannot end session:", { session, userId, hostUserId: session?.host_user_id })
+      toast.error("Only the host can end the session")
+      return
+    }
 
-    await supabase
-      .from("practice_sessions")
-      .update({ is_active: false })
-      .eq("id", session.id)
+    try {
+      console.log("Ending session:", { sessionId: session.id, userId, isActive: session.is_active })
+      
+      // End the session (this will trigger real-time update for all participants)
+      const { data, error } = await supabase
+        .from("practice_sessions")
+        .update({ is_active: false })
+        .eq("id", session.id)
+        .select()
 
-    toast.success("Session ended")
-    router.push("/practice")
+      if (error) {
+        console.error("Error updating session:", error)
+        throw error
+      }
+
+      console.log("Session updated successfully:", data)
+
+      // Optional: Remove all participants (cleanup)
+      const { error: deleteError } = await supabase
+        .from("practice_session_participants")
+        .delete()
+        .eq("session_id", session.id)
+
+      if (deleteError) {
+        console.error("Error removing participants:", deleteError)
+        // Don't throw - session is already ended
+      }
+
+      toast.success("Session ended")
+      router.push("/practice")
+    } catch (error) {
+      console.error("Error ending session:", error)
+      toast.error("Failed to end session")
+    }
   }
 
   if (loading) {
@@ -294,9 +405,13 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
           >
             {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </Button>
-          {userId === session.host_user_id && (
+          {userId === session.host_user_id ? (
             <Button variant="destructive" onClick={endSession}>
               End Session
+            </Button>
+          ) : (
+            <Button variant="outline" onClick={() => router.push("/practice")}>
+              Leave Session
             </Button>
           )}
         </div>
@@ -327,8 +442,8 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
                   >
                     <p className="text-2xl text-center">
                       {showAnswer
-                        ? (isFlashcard ? (currentItem as Flashcard).back : (currentItem as Question).answer)
-                        : (isFlashcard ? (currentItem as Flashcard).front : (currentItem as Question).question)}
+                        ? (isFlashcard ? (currentItem as Flashcard).back_text : (currentItem as Question).answer_text)
+                        : (isFlashcard ? (currentItem as Flashcard).front_text : (currentItem as Question).question_text)}
                     </p>
                   </div>
 
@@ -375,7 +490,37 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
                   )}
                 </>
               ) : (
-                <p className="text-center text-muted-foreground">No items to practice</p>
+                <div className="text-center py-12 space-y-4">
+                  <Brain className="w-16 h-16 mx-auto text-muted-foreground/50" />
+                  <div>
+                    <p className="text-lg font-medium text-muted-foreground">
+                      No {session.session_type} available
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {userId === session.host_user_id ? (
+                        // Message for host
+                        session.document_id 
+                          ? `Create ${session.session_type} from your document to start practicing.`
+                          : `You need to create some ${session.session_type} before starting this session.`
+                      ) : (
+                        // Message for participants
+                        <>
+                          The host hasn't created any {session.session_type} yet.
+                          <br />
+                          <span className="text-xs">Waiting for the host to add study materials...</span>
+                        </>
+                      )}
+                    </p>
+                  </div>
+                  {userId === session.host_user_id && (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => router.push("/documents")}
+                    >
+                      Go to Documents
+                    </Button>
+                  )}
+                </div>
               )}
             </CardContent>
           </Card>

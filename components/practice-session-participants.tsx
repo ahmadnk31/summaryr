@@ -24,6 +24,7 @@ interface PracticeSessionParticipantsProps {
 export function PracticeSessionParticipants({ sessionId, hostUserId }: PracticeSessionParticipantsProps) {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
   useEffect(() => {
@@ -59,16 +60,24 @@ export function PracticeSessionParticipants({ sessionId, hostUserId }: PracticeS
 
   const loadParticipants = async () => {
     try {
+      setLoading(true)
       const { data, error } = await supabase
         .from("practice_session_participants")
         .select("*")
         .eq("session_id", sessionId)
         .order("score", { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error("Error loading participants:", error)
+        throw error
+      }
+      
+      console.log(`Loaded ${data?.length || 0} participants for session ${sessionId}`)
       setParticipants(data || [])
     } catch (error) {
       console.error("Error loading participants:", error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -98,8 +107,13 @@ export function PracticeSessionParticipants({ sessionId, hostUserId }: PracticeS
         <CardDescription>Practice together in real-time</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          {participants.map((participant, index) => {
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {participants.map((participant, index) => {
             const isHost = participant.user_id === hostUserId
             const isCurrentUser = participant.user_id === currentUserId
             const isActive = new Date(participant.last_active_at) > new Date(Date.now() - 30000)
@@ -150,12 +164,13 @@ export function PracticeSessionParticipants({ sessionId, hostUserId }: PracticeS
             )
           })}
 
-          {participants.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No participants yet. Share the session code to invite others!
-            </p>
-          )}
-        </div>
+            {participants.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No participants yet. Share the session code to invite others!
+              </p>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   )

@@ -6,6 +6,7 @@ import { PracticeQuestions } from "@/components/practice-questions"
 import { StudyStatsDashboard } from "@/components/study-stats-dashboard"
 import { CreatePracticeSession } from "@/components/create-practice-session"
 import { JoinPracticeSession } from "@/components/join-practice-session"
+import { UserSessionsList } from "@/components/user-sessions-list"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardNavbar } from "@/components/dashboard-navbar"
 import { Brain, HelpCircle, TrendingUp, Users } from "lucide-react"
@@ -71,10 +72,11 @@ export default function PracticePage() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
               <CreatePracticeSession />
               <JoinPracticeSession />
             </div>
+            <UserSessionsList />
           </TabsContent>
 
           <TabsContent value="stats" className="mt-6">

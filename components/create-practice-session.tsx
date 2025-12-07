@@ -84,20 +84,35 @@ export function CreatePracticeSession() {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error("Error inserting session:", error)
+        throw new Error(`Failed to create session: ${error.message}`)
+      }
+
+      if (!data) {
+        throw new Error("No session data returned")
+      }
 
       // Join as host
-      await supabase.from("practice_session_participants").insert({
-        session_id: data.id,
-        user_id: user.id,
-        display_name: user.email?.split("@")[0] || "Host",
-      })
+      const { error: participantError } = await supabase
+        .from("practice_session_participants")
+        .insert({
+          session_id: data.id,
+          user_id: user.id,
+          display_name: user.email?.split("@")[0] || "Host",
+        })
+
+      if (participantError) {
+        console.error("Error joining as participant:", participantError)
+        throw new Error(`Failed to join session: ${participantError.message}`)
+      }
 
       setSessionCode(code)
       toast.success("Practice session created!")
     } catch (error) {
       console.error("Error creating session:", error)
-      toast.error("Failed to create session")
+      const errorMessage = error instanceof Error ? error.message : "Failed to create session"
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
