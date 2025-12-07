@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { FileText, ArrowLeft, Upload, LogOut, Brain } from "lucide-react"
+import { FileText, ArrowLeft, Upload, LogOut, GraduationCap } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
@@ -62,11 +62,11 @@ export function DashboardNavbar({
               <>
                 <Link href="/practice">
                   <Button variant="ghost" size="sm" className="hidden sm:flex">
-                    <Brain className="h-4 w-4 mr-2" />
+                    <GraduationCap className="h-4 w-4 mr-2" />
                     Practice
                   </Button>
                   <Button variant="ghost" size="icon" className="sm:hidden">
-                    <Brain className="h-4 w-4" />
+                    <GraduationCap className="h-4 w-4" />
                     <span className="sr-only">Practice</span>
                   </Button>
                 </Link>

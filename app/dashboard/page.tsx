@@ -89,21 +89,22 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <DashboardNavbar userName={userName} />
 
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-              <User className="h-5 w-5 text-primary" />
+      <main className="container mx-auto px-4 py-4 sm:py-8 max-w-7xl">
+        <div className="mb-4 sm:mb-8">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+              <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold">Welcome back, {userName}!</h2>
-              <p className="text-muted-foreground mt-1">Upload documents and create study materials with AI</p>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold truncate">Welcome back, {userName}!</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1 truncate">Upload documents and create study materials with AI</p>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors group">
+        <div className="overflow-x-auto -mx-4 px-4 pb-2 mb-8">
+          <div className="flex gap-4 min-w-max md:grid md:grid-cols-2 lg:grid-cols-4 md:min-w-0 md:gap-6">
+          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors group min-w-[280px] md:min-w-0">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">Documents</CardTitle>
@@ -127,7 +128,7 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors group">
+          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors group min-w-[280px] md:min-w-0">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">Flashcards</CardTitle>
@@ -143,7 +144,7 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors group">
+          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors group min-w-[280px] md:min-w-0">
             <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">Notes</CardTitle>
@@ -159,7 +160,7 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors group">
+          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors group min-w-[280px] md:min-w-0">
             <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">Summaries</CardTitle>
@@ -174,55 +175,58 @@ export default async function DashboardPage() {
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <DocumentUpload />
 
-          <Card className="h-full">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    Recent Documents
+          <Card className="h-full overflow-hidden">
+            <CardHeader className="overflow-hidden">
+              <div className="flex items-center justify-between gap-2 overflow-hidden">
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="flex items-center gap-2 truncate">
+                    <Clock className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                    <span className="truncate">Recent Documents</span>
                   </CardTitle>
-                  <CardDescription className="mt-1">
+                  <CardDescription className="mt-1 truncate">
                     Your latest uploaded documents
                   </CardDescription>
                 </div>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href="/documents" className="flex items-center gap-1">
-                    View All
+                <Button variant="ghost" size="sm" asChild className="flex-shrink-0">
+                  <Link href="/documents" className="flex items-center gap-1 whitespace-nowrap">
+                    <span className="hidden sm:inline">View All</span>
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-hidden">
               {documents && documents.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-2 overflow-hidden">
                   {documents.map((doc, index) => (
                     <Link
                       key={doc.id}
                       href={`/documents/${doc.id}`}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-border/50 hover:border-primary/50 hover:bg-accent/50 transition-all group"
+                      className="flex items-center gap-2 p-2.5 sm:p-3 rounded-lg border border-border/50 hover:border-primary/50 hover:bg-accent/50 transition-all group w-full overflow-hidden max-w-full"
                     >
-                      <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center group-hover:from-primary/20 group-hover:to-primary/10 transition-colors">
-                        <FileText className="h-5 w-5 text-primary" />
+                      <div className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center group-hover:from-primary/20 group-hover:to-primary/10 transition-colors">
+                        <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate group-hover:text-primary transition-colors">{doc.title}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <p className="font-medium truncate group-hover:text-primary transition-colors text-sm" title={doc.title}>
+                          {doc.title.length > 25 ? `${doc.title.substring(0, 25)}...` : doc.title}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-0.5 overflow-hidden">
+                          <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium flex-shrink-0">
                             {doc.file_type.toUpperCase()}
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] sm:text-xs text-muted-foreground truncate">
                             {new Date(doc.upload_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                           </span>
                         </div>
                       </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ArrowRight className="hidden sm:block h-4 w-4 flex-shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                     </Link>
                   ))}
                 </div>
