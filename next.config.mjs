@@ -11,8 +11,10 @@ const nextConfig = {
     minimumCacheTTL: 60,
   },
   // <CHANGE> Increased body size limit for server actions to handle document uploads
-  serverActions: {
-    bodySizeLimit: '10mb',
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
   },
   // Performance optimizations
   compress: true,

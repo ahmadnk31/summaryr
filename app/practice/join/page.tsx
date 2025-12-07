@@ -1,13 +1,13 @@
 "use client"
 
-import { useEffect } from "react"
+import { Suspense, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { DashboardNavbar } from "@/components/dashboard-navbar"
 import { JoinPracticeSession } from "@/components/join-practice-session"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 
-export default function JoinPage() {
+function JoinPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const code = searchParams.get("code")
@@ -41,5 +41,22 @@ export default function JoinPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function JoinPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
+        <DashboardNavbar />
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        </main>
+      </div>
+    }>
+      <JoinPageContent />
+    </Suspense>
   )
 }
