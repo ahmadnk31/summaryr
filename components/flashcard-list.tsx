@@ -237,6 +237,17 @@ export function FlashcardList({ documentId, refreshKey }: FlashcardListProps) {
           )}
         >
           <CardContent className="pt-6">
+            <div className="flex items-start justify-between mb-3">
+              <p className="text-xs text-muted-foreground">
+                {new Date(card.created_at).toLocaleDateString()} at {new Date(card.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            </div>
+            {card.source_text && (
+              <div className="mb-3">
+                <p className="text-xs text-muted-foreground mb-1">Source Text:</p>
+                <p className="text-xs bg-muted p-2 rounded max-h-16 overflow-y-auto line-clamp-3">{card.source_text}</p>
+              </div>
+            )}
             <div
               className={cn(
                 "cursor-pointer min-h-32 flex items-center justify-center text-center p-4 rounded-lg transition-colors",

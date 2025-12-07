@@ -99,8 +99,9 @@ export async function POST(req: Request) {
         question: z.string().describe("The study question"),
         answer: z.string().describe("The answer to the question"),
         difficulty: z.enum(["easy", "medium", "hard"]).describe("The difficulty level"),
+        options: z.array(z.string()).optional().describe("Options for multiple choice questions (if applicable)"),
       }),
-      prompt: `Create a study question in ${languageName} from the following text. ${typePrompt} The question should test understanding of the key concepts.
+      prompt: `Create a study question in ${languageName} from the following text. ${typePrompt} The question should test understanding of the key concepts.${type === "multiple_choice" ? " Include 4 options and make sure the answer is one of them." : ""}
 
 Text: ${text}`,
       onFinish: async ({ object }) => {

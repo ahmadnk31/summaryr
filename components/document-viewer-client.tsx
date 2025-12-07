@@ -35,6 +35,10 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
   const [notePosition, setNotePosition] = useState<{ start?: number; end?: number }>({})
   const [refreshKey, setRefreshKey] = useState(0)
   const [isMounted, setIsMounted] = useState(false)
+  const [autoGenerateExplain, setAutoGenerateExplain] = useState(false)
+  const [autoGenerateSummary, setAutoGenerateSummary] = useState(false)
+  const [autoGenerateFlashcard, setAutoGenerateFlashcard] = useState(false)
+  const [autoGenerateQuestion, setAutoGenerateQuestion] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
@@ -44,6 +48,8 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
     // Use full document text if no text is selected
     const textToUse = text.trim() || document.extracted_text || ""
     setSelectedText(textToUse)
+    // Auto-generate when triggered from selection toolbar (text is provided)
+    setAutoGenerateFlashcard(!!text.trim())
     setFlashcardDialogOpen(true)
   }
 
@@ -51,6 +57,8 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
     // Use full document text if no text is selected
     const textToUse = text.trim() || document.extracted_text || ""
     setSelectedText(textToUse)
+    // Auto-generate when triggered from selection toolbar (text is provided)
+    setAutoGenerateQuestion(!!text.trim())
     setQuestionDialogOpen(true)
   }
 
@@ -58,6 +66,8 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
     // Use full document text if no text is selected
     const textToUse = text.trim() || document.extracted_text || ""
     setSelectedText(textToUse)
+    // Auto-generate when triggered from selection toolbar (text is provided)
+    setAutoGenerateSummary(!!text.trim())
     setSummaryDialogOpen(true)
   }
 
@@ -65,6 +75,8 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
     // Use full document text if no text is selected
     const textToUse = text.trim() || document.extracted_text || ""
     setSelectedText(textToUse)
+    // Auto-generate when triggered from selection toolbar (text is provided)
+    setAutoGenerateExplain(!!text.trim())
     setExplainDialogOpen(true)
   }
 
@@ -209,23 +221,24 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
 
         {/* Desktop layout - resizable */}
         <div className="hidden lg:block h-[calc(100vh-4rem)]">
-          <ResizablePanelGroup direction="horizontal" className="h-full">
-            <ResizablePanel defaultSize={65} minSize={40} maxSize={80} className="min-w-0">
-              <div className="h-full overflow-auto pr-2 sm:pr-4">
-                <DocumentViewer
-                  document={document}
-                  onCreateFlashcard={handleCreateFlashcard}
-                  onCreateQuestion={handleCreateQuestion}
-                  onSummarize={handleSummarize}
-                  onExplain={handleExplain}
-                  onCreateNote={handleCreateNote}
-                />
-              </div>
-            </ResizablePanel>
-            
-            <ResizableHandle withHandle />
-            
-            <ResizablePanel defaultSize={35} minSize={20} maxSize={60} className="min-w-0">
+          {isMounted ? (
+            <ResizablePanelGroup direction="horizontal" className="h-full">
+              <ResizablePanel defaultSize={65} minSize={40} maxSize={80} className="min-w-0">
+                <div className="h-full overflow-auto pr-2 sm:pr-4">
+                  <DocumentViewer
+                    document={document}
+                    onCreateFlashcard={handleCreateFlashcard}
+                    onCreateQuestion={handleCreateQuestion}
+                    onSummarize={handleSummarize}
+                    onExplain={handleExplain}
+                    onCreateNote={handleCreateNote}
+                  />
+                </div>
+              </ResizablePanel>
+              
+              <ResizableHandle withHandle />
+              
+              <ResizablePanel defaultSize={35} minSize={20} maxSize={60} className="min-w-0">
             <Card className="h-full flex flex-col w-full">
               <CardHeader className="flex-shrink-0">
                 <CardTitle className="text-base sm:text-lg">Study Materials</CardTitle>
@@ -332,43 +345,60 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
             </Card>
           </ResizablePanel>
         </ResizablePanelGroup>
+        ) : null}
         </div>
       </main>
 
       <FlashcardDialog
         open={flashcardDialogOpen}
-        onOpenChange={setFlashcardDialogOpen}
+        onOpenChange={(open) => {
+          setFlashcardDialogOpen(open)
+          if (!open) setAutoGenerateFlashcard(false)
+        }}
         documentId={document.id}
         selectedText={selectedText}
         documentText={document.extracted_text || ""}
         onSuccess={handleSuccess}
+        autoGenerate={autoGenerateFlashcard}
       />
 
       <QuestionDialog
         open={questionDialogOpen}
-        onOpenChange={setQuestionDialogOpen}
+        onOpenChange={(open) => {
+          setQuestionDialogOpen(open)
+          if (!open) setAutoGenerateQuestion(false)
+        }}
         documentId={document.id}
         selectedText={selectedText}
         documentText={document.extracted_text || ""}
         onSuccess={handleSuccess}
+        autoGenerate={autoGenerateQuestion}
       />
 
       <SummaryDialog
         open={summaryDialogOpen}
-        onOpenChange={setSummaryDialogOpen}
+        onOpenChange={(open) => {
+          setSummaryDialogOpen(open)
+          if (!open) setAutoGenerateSummary(false)
+        }}
         documentId={document.id}
         selectedText={selectedText}
         documentText={document.extracted_text || ""}
         onSuccess={handleSuccess}
+        autoGenerate={autoGenerateSummary}
       />
 
       <ExplainDialog
         open={explainDialogOpen}
-        onOpenChange={setExplainDialogOpen}
+        onOpenChange={(open) => {
+          setExplainDialogOpen(open)
+          if (!open) setAutoGenerateExplain(false)
+        }}
         documentId={document.id}
         selectedText={selectedText}
         documentText={document.extracted_text || ""}
         onSuccess={handleSuccess}
+        autoGenerate={autoGenerateExplain}
       />
 
       <NoteDialog

@@ -17,7 +17,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { text, documentId } = await req.json()
+    const body = await req.json()
+    const text = body.prompt || body.text
+    const documentId = body.documentId
+
+    console.log("Explain API received:", { hasText: !!text, textLength: text?.length, documentId })
 
     if (!text) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 })
@@ -87,6 +91,7 @@ export async function POST(req: Request) {
       prompt: `Provide a clear and detailed explanation in ${languageName} of the following text. Explain what it means in simple terms, break down complex concepts, and help the reader understand the key points:\n\n${text}`,
       onFinish: async ({ text: explanation }) => {
         // Save to database after streaming completes
+        console.log("Streaming finished, saving to DB, explanation length:", explanation.length)
         try {
           const { error } = await supabase.from("explanations").insert({
             user_id: user.id,
@@ -102,6 +107,7 @@ export async function POST(req: Request) {
       },
     })
 
+    console.log("Returning stream response")
     return result.toTextStreamResponse()
   } catch (error) {
     console.error("Error generating explanation:", error)

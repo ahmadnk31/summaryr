@@ -350,11 +350,20 @@ export function QuestionList({ documentId, refreshKey }: QuestionListProps) {
             isSubmitted && result === "incorrect" && "ring-2 ring-red-500"
           )}>
             <CardContent className="pt-6">
-              <div className="flex items-start justify-between mb-2">
+              <div className="flex items-start justify-between mb-3">
                 <Badge variant="secondary" className="text-xs">
                   {q.difficulty}
                 </Badge>
+                <p className="text-xs text-muted-foreground">
+                  {new Date(q.created_at).toLocaleDateString()} at {new Date(q.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
               </div>
+              {q.source_text && (
+                <div className="mb-3">
+                  <p className="text-xs text-muted-foreground mb-1">Source Text:</p>
+                  <p className="text-xs bg-muted p-2 rounded max-h-16 overflow-y-auto line-clamp-3">{q.source_text}</p>
+                </div>
+              )}
               <p className="text-sm font-semibold mb-3">{q.question_text}</p>
               
               {!isSubmitted ? (
