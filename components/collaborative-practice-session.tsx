@@ -28,6 +28,8 @@ interface Question {
   id: string
   question_text: string
   answer_text: string
+  question_type: 'multiple_choice' | 'short_answer' | 'true_false' | 'essay' | 'fill_blank'
+  options?: string[]
   easiness_factor: number
   interval_days: number
   repetition_count: number
@@ -52,6 +54,8 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
   const [items, setItems] = useState<(Flashcard | Question)[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
+  const [selectedOption, setSelectedOption] = useState<string | null>(null)
+  const [userAnswer, setUserAnswer] = useState("")
   const [loading, setLoading] = useState(true)
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
@@ -298,6 +302,8 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
     if (currentIndex < items.length - 1) {
       setCurrentIndex(currentIndex + 1)
       setShowAnswer(false)
+      setSelectedOption(null)
+      setUserAnswer("")
     } else {
       // Session complete
       toast.success("Practice session complete!")
@@ -433,29 +439,119 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
               </div>
               <Progress value={progress} className="h-2" />
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 overflow-x-hidden">
               {currentItem ? (
                 <>
-                  <div
-                    className="min-h-[200px] flex items-center justify-center p-8 bg-primary/5 rounded-lg cursor-pointer hover:bg-primary/10 transition-colors"
-                    onClick={handleFlip}
-                  >
-                    <p className="text-2xl text-center">
-                      {showAnswer
-                        ? (isFlashcard ? (currentItem as Flashcard).back_text : (currentItem as Question).answer_text)
-                        : (isFlashcard ? (currentItem as Flashcard).front_text : (currentItem as Question).question_text)}
+                  {/* Question Text */}
+                  <div className="p-6 bg-secondary/50 rounded-lg overflow-hidden">
+                    <p className="text-lg break-words">
+                      {isFlashcard ? (currentItem as Flashcard).front_text : (currentItem as Question).question_text}
                     </p>
                   </div>
 
-                  <Button
-                    variant="outline"
-                    onClick={handleFlip}
-                    className="w-full"
-                  >
-                    <RotateCw className="w-4 h-4 mr-2" />
-                    {showAnswer ? "Show Question" : "Show Answer"}
-                  </Button>
+                  {/* Render different UI based on question type */}
+                  {!showAnswer && !isFlashcard && (
+                    <>
+                      {(currentItem as Question).question_type === 'multiple_choice' && (currentItem as Question).options && (
+                        <div className="space-y-2">
+                          <p className="text-sm text-muted-foreground">Select your answer:</p>
+                          <div className="grid grid-cols-1 gap-2">
+                            {(currentItem as Question).options!.map((option, idx) => (
+                              <Button
+                                key={idx}
+                                variant={selectedOption === option ? "default" : "outline"}
+                                className="justify-start text-left h-auto py-3 px-4 whitespace-normal break-words min-h-[44px]"
+                                onClick={() => setSelectedOption(option)}
+                              >
+                                <span className="font-semibold mr-2 flex-shrink-0">{String.fromCharCode(65 + idx)}.</span>
+                                <span className="flex-1">{option}</span>
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
+                      {(currentItem as Question).question_type === 'true_false' && (
+                        <div className="space-y-2">
+                          <p className="text-sm text-muted-foreground">Select your answer:</p>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button
+                              variant={selectedOption === 'True' ? "default" : "outline"}
+                              className="py-6"
+                              onClick={() => setSelectedOption('True')}
+                            >
+                              True
+                            </Button>
+                            <Button
+                              variant={selectedOption === 'False' ? "default" : "outline"}
+                              className="py-6"
+                              onClick={() => setSelectedOption('False')}
+                            >
+                              False
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {(currentItem as Question).question_type === 'fill_blank' && (
+                        <div className="space-y-2">
+                          <p className="text-sm text-muted-foreground">Type your answer:</p>
+                          <input
+                            type="text"
+                            value={userAnswer}
+                            onChange={(e) => setUserAnswer(e.target.value)}
+                            placeholder="Your answer..."
+                            className="w-full p-3 rounded-lg border border-input bg-background"
+                          />
+                        </div>
+                      )}
+
+                      {((currentItem as Question).question_type === 'short_answer' || (currentItem as Question).question_type === 'essay') && (
+                        <div className="space-y-2">
+                          <p className="text-sm text-muted-foreground">Type your answer:</p>
+                          <textarea
+                            value={userAnswer}
+                            onChange={(e) => setUserAnswer(e.target.value)}
+                            placeholder="Your answer..."
+                            rows={(currentItem as Question).question_type === 'essay' ? 6 : 3}
+                            className="w-full p-3 rounded-lg border border-input bg-background resize-none"
+                          />
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Show answer section */}
+                  {showAnswer && (
+                    <div className="space-y-4">
+                      <div className="p-6 bg-primary/5 border border-primary/20 rounded-lg overflow-hidden">
+                        <p className="text-sm text-muted-foreground mb-2">Correct Answer:</p>
+                        <p className="text-lg font-semibold break-words">
+                          {isFlashcard ? (currentItem as Flashcard).back_text : (currentItem as Question).answer_text}
+                        </p>
+                      </div>
+                      {!isFlashcard && (userAnswer || selectedOption) && (
+                        <div className="p-6 bg-secondary rounded-lg overflow-hidden">
+                          <p className="text-sm text-muted-foreground mb-2">Your Answer:</p>
+                          <p className="text-lg break-words">{selectedOption || userAnswer}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Show Answer Button (for flashcards or after answering questions) */}
+                  {!showAnswer && (isFlashcard || selectedOption || userAnswer) && (
+                    <Button
+                      variant="outline"
+                      onClick={handleFlip}
+                      className="w-full"
+                    >
+                      <RotateCw className="w-4 h-4 mr-2" />
+                      Show Answer
+                    </Button>
+                  )}
+
+                  {/* Rating buttons */}
                   {showAnswer && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                       <Button

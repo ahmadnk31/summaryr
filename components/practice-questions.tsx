@@ -16,6 +16,8 @@ interface Question {
   question_text: string
   answer_text: string
   difficulty: string
+  question_type: 'multiple_choice' | 'short_answer' | 'true_false' | 'essay' | 'fill_blank'
+  options?: string[]
   repetition_count: number
   easiness_factor: number
   interval_days: number
@@ -33,6 +35,7 @@ export function PracticeQuestions({ documentId }: PracticeSessionProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
   const [userAnswer, setUserAnswer] = useState("")
+  const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [sessionComplete, setSessionComplete] = useState(false)
   const [soundEnabled, setSoundEnabled] = useState(true)
@@ -134,6 +137,7 @@ export function PracticeQuestions({ documentId }: PracticeSessionProps) {
         setCurrentIndex(currentIndex + 1)
         setShowAnswer(false)
         setUserAnswer("")
+        setSelectedOption(null)
       }
     } catch (error) {
       console.error("Error saving review:", error)
@@ -225,21 +229,99 @@ export function PracticeQuestions({ documentId }: PracticeSessionProps) {
 
       <Progress value={progress} className="h-2" />
 
-      <Card className="min-h-[400px]">
+      <Card className="min-h-[400px] overflow-hidden">
         <CardHeader>
           <CardTitle className="text-center">Question</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="p-6 bg-secondary/50 rounded-lg">
-            <p className="text-lg">{currentQuestion.question_text}</p>
+        <CardContent className="space-y-4 overflow-x-hidden">
+          <div className="p-4 sm:p-6 bg-secondary/50 rounded-lg">
+            <p className="text-base sm:text-lg break-words">{currentQuestion.question_text}</p>
           </div>
+
+          {/* Render different UI based on question type */}
+          {!showAnswer && (
+            <>
+              {currentQuestion.question_type === 'multiple_choice' && currentQuestion.options && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Select your answer:</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {currentQuestion.options.map((option, idx) => (
+                      <Button
+                        key={idx}
+                        variant={selectedOption === option ? "default" : "outline"}
+                        className="justify-start text-left h-auto py-3 px-4 whitespace-normal break-words min-h-[44px]"
+                        onClick={() => setSelectedOption(option)}
+                      >
+                        <span className="font-semibold mr-2 flex-shrink-0">{String.fromCharCode(65 + idx)}.</span>
+                        <span className="flex-1">{option}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {currentQuestion.question_type === 'true_false' && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Select your answer:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant={selectedOption === 'True' ? "default" : "outline"}
+                      className="py-6"
+                      onClick={() => setSelectedOption('True')}
+                    >
+                      True
+                    </Button>
+                    <Button
+                      variant={selectedOption === 'False' ? "default" : "outline"}
+                      className="py-6"
+                      onClick={() => setSelectedOption('False')}
+                    >
+                      False
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {currentQuestion.question_type === 'fill_blank' && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Type your answer:</p>
+                  <input
+                    type="text"
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                    placeholder="Your answer..."
+                    className="w-full p-3 rounded-lg border border-input bg-background"
+                  />
+                </div>
+              )}
+
+              {(currentQuestion.question_type === 'short_answer' || currentQuestion.question_type === 'essay') && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Type your answer:</p>
+                  <textarea
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                    placeholder="Your answer..."
+                    rows={currentQuestion.question_type === 'essay' ? 6 : 3}
+                    className="w-full p-3 rounded-lg border border-input bg-background resize-none"
+                  />
+                </div>
+              )}
+            </>
+          )}
 
           {showAnswer && (
             <div className="space-y-4">
-              <div className="p-6 bg-primary/5 border border-primary/20 rounded-lg">
+              <div className="p-4 sm:p-6 bg-primary/5 border border-primary/20 rounded-lg overflow-hidden">
                 <p className="text-sm text-muted-foreground mb-2">Correct Answer:</p>
-                <p className="text-lg">{currentQuestion.answer_text}</p>
+                <p className="text-base sm:text-lg font-semibold break-words">{currentQuestion.answer_text}</p>
               </div>
+              {(userAnswer || selectedOption) && (
+                <div className="p-4 sm:p-6 bg-secondary rounded-lg overflow-hidden">
+                  <p className="text-sm text-muted-foreground mb-2">Your Answer:</p>
+                  <p className="text-base sm:text-lg break-words">{selectedOption || userAnswer}</p>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

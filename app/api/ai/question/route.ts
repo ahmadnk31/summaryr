@@ -114,6 +114,8 @@ Text: ${text}`,
             question_text: object.question,
             answer_text: object.answer,
             difficulty: object.difficulty,
+            question_type: type,
+            options: object.options || null,
             source_text: text,
           })
           if (error) console.error("Error saving question:", error)

@@ -365,48 +365,118 @@ export function QuestionList({ documentId, refreshKey }: QuestionListProps) {
 
         return (
           <Card key={q.id} className={cn(
-            "transition-all hover:shadow-md",
+            "transition-all hover:shadow-md overflow-hidden",
             isRevealed && "ring-2 ring-primary",
             isSubmitted && result === "correct" && "ring-2 ring-green-500",
             isSubmitted && result === "incorrect" && "ring-2 ring-red-500"
           )}>
-            <CardContent className="pt-6">
-              <div className="flex items-start justify-between mb-3">
-                <Badge variant="secondary" className="text-xs">
-                  {q.difficulty}
-                </Badge>
+            <CardContent className="pt-6 overflow-x-hidden">
+              <div className="flex items-start justify-between mb-3 gap-2">
+                <div className="flex gap-2">
+                  <Badge variant="secondary" className="text-xs">
+                    {q.difficulty}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {q.question_type === 'multiple_choice' && 'MCQ'}
+                    {q.question_type === 'short_answer' && 'Short Answer'}
+                    {q.question_type === 'true_false' && 'True/False'}
+                    {q.question_type === 'essay' && 'Essay'}
+                    {q.question_type === 'fill_blank' && 'Fill Blank'}
+                  </Badge>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {new Date(q.created_at).toLocaleDateString()} at {new Date(q.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
               {q.source_text && (
-                <div className="mb-3">
+                <div className="mb-3 overflow-hidden">
                   <p className="text-xs text-muted-foreground mb-1">Source Text:</p>
-                  <p className="text-xs bg-muted p-2 rounded max-h-16 overflow-y-auto line-clamp-3">{q.source_text}</p>
+                  <p className="text-xs bg-muted p-2 rounded max-h-16 overflow-y-auto line-clamp-3 break-words">{q.source_text}</p>
                 </div>
               )}
-              <p className="text-sm font-semibold mb-3">{q.question_text}</p>
+              <p className="text-sm font-semibold mb-3 break-words">{q.question_text}</p>
               
               {!isSubmitted ? (
                 <div className="space-y-2 mb-3">
-                  <Label htmlFor={`answer-${q.id}`}>Your Answer</Label>
-                  <Textarea
-                    id={`answer-${q.id}`}
-                    value={userAnswer}
-                    onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                    placeholder="Type your answer here..."
-                    className="min-h-20"
-                  />
-                  <Button
-                    size="sm"
-                    variant="default"
-                    onClick={() => submitAnswer(q.id)}
-                    disabled={!userAnswer.trim()}
-                    className="w-full"
-                  >
-                    <Send className="h-3 w-3 mr-2" />
-                    Submit Answer
-                  </Button>
+                  {q.question_type === 'multiple_choice' && q.options ? (
+                    <>
+                      <Label>Select your answer:</Label>
+                      <div className="grid grid-cols-1 gap-2">
+                        {q.options.map((option: string, idx: number) => (
+                          <Button
+                            key={idx}
+                            variant={userAnswer === option ? "default" : "outline"}
+                            className="justify-start text-left h-auto py-2 px-3 text-sm whitespace-normal break-words min-h-[40px]"
+                            onClick={() => handleAnswerChange(q.id, option)}
+                          >
+                            <span className="font-semibold mr-2 flex-shrink-0">{String.fromCharCode(65 + idx)}.</span>
+                            <span className="flex-1">{option}</span>
+                          </Button>
+                        ))}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => submitAnswer(q.id)}
+                        disabled={!userAnswer.trim()}
+                        className="w-full"
+                      >
+                        <Send className="h-3 w-3 mr-2" />
+                        Submit Answer
+                      </Button>
+                    </>
+                  ) : q.question_type === 'true_false' ? (
+                    <>
+                      <Label>Select your answer:</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant={userAnswer === 'True' ? "default" : "outline"}
+                          className="py-3"
+                          onClick={() => handleAnswerChange(q.id, 'True')}
+                        >
+                          True
+                        </Button>
+                        <Button
+                          variant={userAnswer === 'False' ? "default" : "outline"}
+                          className="py-3"
+                          onClick={() => handleAnswerChange(q.id, 'False')}
+                        >
+                          False
+                        </Button>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => submitAnswer(q.id)}
+                        disabled={!userAnswer.trim()}
+                        className="w-full"
+                      >
+                        <Send className="h-3 w-3 mr-2" />
+                        Submit Answer
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Label htmlFor={`answer-${q.id}`}>Your Answer</Label>
+                      <Textarea
+                        id={`answer-${q.id}`}
+                        value={userAnswer}
+                        onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                        placeholder="Type your answer here..."
+                        className={cn("min-h-20", q.question_type === 'essay' && "min-h-32")}
+                      />
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => submitAnswer(q.id)}
+                        disabled={!userAnswer.trim()}
+                        className="w-full"
+                      >
+                        <Send className="h-3 w-3 mr-2" />
+                        Submit Answer
+                      </Button>
+                    </>
+                  )}
                 </div>
               ) : (
                 <div className={cn(

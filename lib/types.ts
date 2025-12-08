@@ -30,6 +30,8 @@ export interface Question {
   answer_text: string
   source_text: string | null
   difficulty: string
+  question_type: 'multiple_choice' | 'short_answer' | 'true_false' | 'essay' | 'fill_blank'
+  options?: string[]
   created_at: string
 }
 
