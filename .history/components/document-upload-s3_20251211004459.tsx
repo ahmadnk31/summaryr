@@ -143,49 +143,6 @@ export function DocumentUploadS3() {
     [handleFileUpload]
   )
 
-  const handleUrlSubmit = useCallback(async () => {
-    if (!url.trim()) {
-      setError("Please enter a valid URL")
-      return
-    }
-
-    // Basic URL validation
-    try {
-      new URL(url)
-    } catch {
-      setError("Please enter a valid URL")
-      return
-    }
-
-    setIsUploading(true)
-    setError(null)
-    setUploadProgress(0)
-
-    try {
-      const response = await fetch("/api/scrape-url", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to scrape URL")
-      }
-
-      const { documentId } = await response.json()
-      setUploadProgress(100)
-      router.push(`/documents/${documentId}`)
-    } catch (err) {
-      console.error("URL scraping error:", err)
-      setError(err instanceof Error ? err.message : "Failed to scrape URL")
-      setIsUploading(false)
-      setUploadProgress(0)
-    }
-  }, [url, router])
-
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {

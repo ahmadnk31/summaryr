@@ -179,7 +179,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <UnifiedUpload />
+          <DocumentUploadS3 />
 
           <Card className="h-full overflow-hidden">
             <CardHeader className="overflow-hidden">
