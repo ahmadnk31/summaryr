@@ -45,11 +45,8 @@ export default function Page() {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
-        },
       })
-      
+
       if (error) throw error
       
       // Check if email is verified - redirect to verification page if not verified

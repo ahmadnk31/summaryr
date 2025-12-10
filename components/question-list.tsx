@@ -121,17 +121,28 @@ export function QuestionList({ documentId, refreshKey }: QuestionListProps) {
   }
 
   const submitAnswer = (questionId: string) => {
-    const userAnswer = userAnswers.get(questionId)?.trim().toLowerCase() || ""
-    const correctAnswer = questions.find((q) => q.id === questionId)?.answer_text.trim().toLowerCase() || ""
+    const userAnswer = userAnswers.get(questionId)?.trim() || ""
+    const question = questions.find((q) => q.id === questionId)
+    const correctAnswer = question?.answer_text.trim() || ""
     
-    // Simple comparison - can be enhanced with fuzzy matching
-    const isCorrect = userAnswer === correctAnswer || 
-                      correctAnswer.includes(userAnswer) || 
-                      userAnswer.includes(correctAnswer) ||
-                      // Check if key terms match (for longer answers)
-                      (userAnswer.length > 10 && correctAnswer.length > 10 && 
-                       userAnswer.split(/\s+/).some(term => correctAnswer.includes(term)) &&
-                       correctAnswer.split(/\s+/).some(term => userAnswer.includes(term)))
+    let isCorrect = false
+    
+    if (question?.question_type === 'multiple_choice' || question?.question_type === 'true_false') {
+      // For multiple choice and true/false, do exact comparison (case insensitive)
+      isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase()
+    } else {
+      // For other types, use fuzzy matching
+      const userLower = userAnswer.toLowerCase()
+      const correctLower = correctAnswer.toLowerCase()
+      
+      isCorrect = userLower === correctLower || 
+                  correctLower.includes(userLower) || 
+                  userLower.includes(correctLower) ||
+                  // Check if key terms match (for longer answers)
+                  (userAnswer.length > 10 && correctAnswer.length > 10 && 
+                   userAnswer.split(/\s+/).some(term => correctLower.includes(term.toLowerCase())) &&
+                   correctAnswer.split(/\s+/).some(term => userLower.includes(term.toLowerCase())))
+    }
 
     setAnswerResults((prev) => {
       const next = new Map(prev)

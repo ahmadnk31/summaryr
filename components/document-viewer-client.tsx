@@ -372,7 +372,6 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
         selectedText={selectedText}
         documentText={document.extracted_text || ""}
         onSuccess={handleSuccess}
-        autoGenerate={autoGenerateQuestion}
       />
 
       <SummaryDialog

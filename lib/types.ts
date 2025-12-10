@@ -9,8 +9,6 @@ export interface Document {
   page_count: number
   upload_date: string
   last_accessed: string
-  storage_path: string
-  storage_type?: 's3' | 'supabase'
 }
 
 export interface Flashcard {
@@ -32,7 +30,7 @@ export interface Question {
   answer_text: string
   source_text: string | null
   difficulty: string
-  question_type: 'multiple_choice' | 'short_answer' | 'true_false' | 'essay' | 'fill_blank'
+  question_type?: string
   options?: string[]
   created_at: string
 }

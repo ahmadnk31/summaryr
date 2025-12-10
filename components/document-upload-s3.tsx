@@ -255,14 +255,7 @@ export function DocumentUploadS3() {
           )}
         </div>
 
-        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg">
-          <p className="text-xs text-blue-900 dark:text-blue-100 flex items-center gap-2">
-            <Cloud className="h-4 w-4" />
-            <span>
-              Files automatically use AWS S3 + CloudFront CDN when configured, with fallback to Supabase Storage
-            </span>
-          </p>
-        </div>
+        
       </CardContent>
     </Card>
   )
