@@ -215,8 +215,9 @@ export default async function DashboardPage() {
                       </div>
                       <div className="flex-1 min-w-0 overflow-hidden">
                         <p className="font-medium truncate group-hover:text-primary transition-colors text-sm" title={doc.title}>
-                          {doc.title.length > 25 ? `${doc.title.substring(0, 25)}...` : doc.title}
-                        </p>
+  {doc.title?.length > 25 ? `${doc.title.substring(0, 25)}...` : doc.title || "Untitled Document"}
+</p>
+
                         <div className="flex items-center gap-1.5 mt-0.5 overflow-hidden">
                           <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium flex-shrink-0">
                             {doc.file_type.toUpperCase()}
