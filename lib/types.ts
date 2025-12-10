@@ -9,6 +9,8 @@ export interface Document {
   page_count: number
   upload_date: string
   last_accessed: string
+  storage_path: string
+  storage_type?: 's3' | 'supabase'
 }
 
 export interface Flashcard {

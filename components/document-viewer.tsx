@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TextSelectionToolbar } from "@/components/text-selection-toolbar"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { FormattedDocumentContent } from "@/components/formatted-document-content"
 import type { Document } from "@/lib/types"
 
 interface DocumentViewerProps {
@@ -235,14 +236,10 @@ export function DocumentViewer({
           <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[calc(100vh-16rem)]">
             <div
               ref={contentRef}
-              className="prose prose-sm sm:prose-base dark:prose-invert max-w-none select-text px-2 sm:px-4 lg:px-6 py-6"
+              className="select-text px-2 sm:px-4 lg:px-6 py-6"
               style={{ userSelect: "text" }}
             >
-              {doc.extracted_text.split("\n\n").map((paragraph, index) => (
-                <p key={index} className="mb-4 leading-relaxed text-sm sm:text-base lg:text-lg break-words whitespace-pre-wrap">
-                  {paragraph}
-                </p>
-              ))}
+              <FormattedDocumentContent text={doc.extracted_text} />
             </div>
           </ScrollArea>
         </CardContent>
@@ -252,7 +249,7 @@ export function DocumentViewer({
         <TextSelectionToolbar
           selectedText={selectedText}
           position={toolbarPosition}
-          containerRef={containerRef}
+          containerRef={containerRef as React.RefObject<HTMLElement>}
           onCreateFlashcard={handleCreateFlashcard}
           onCreateQuestion={handleCreateQuestion}
           onSummarize={handleSummarize}
