@@ -126,68 +126,95 @@ async function extractContentWithAI(
   } = options
 
   try {
-    // Pre-process HTML to remove obvious non-content and reduce size
-    const cleanedHtml = html
+    // Step 1: Aggressively clean HTML
+    let cleanedHtml = html
       // Remove script and style tags
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<link[^>]*>/gi, '')
+      .replace(/<meta[^>]*>/gi, '')
       // Remove comments
       .replace(/<!--[\s\S]*?-->/g, '')
-      // Remove SVG content
+      // Remove SVG and canvas
       .replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '')
-      // Remove nav, footer, header (usually navigation)
+      .replace(/<canvas[^>]*>[\s\S]*?<\/canvas>/gi, '')
+      // Remove images (keep alt text)
+      .replace(/<img[^>]*alt="([^"]*)"[^>]*>/gi, ' $1 ')
+      .replace(/<img[^>]*>/gi, '')
+      // Remove nav, footer, header, aside
       .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
       .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+      .replace(/<aside[^>]*>[\s\S]*?<\/aside>/gi, '')
       // Remove hidden elements
-      .replace(/<[^>]+hidden[^>]*>[\s\S]*?<\/[^>]+>/gi, '')
-      // Remove common ad/tracking elements
-      .replace(/<div[^>]*(?:ad-|ads-|advertisement|tracking|cookie|banner)[^>]*>[\s\S]*?<\/div>/gi, '')
-      // Normalize whitespace
-      .replace(/\s+/g, ' ')
+      .replace(/<[^>]+(?:hidden|display:\s*none)[^>]*>[\s\S]*?<\/[^>]+>/gi, '')
+      // Remove forms and inputs
+      .replace(/<form[^>]*>[\s\S]*?<\/form>/gi, '')
+      .replace(/<input[^>]*>/gi, '')
+      .replace(/<button[^>]*>[\s\S]*?<\/button>/gi, '')
+      // Remove iframes and embeds
+      .replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '')
+      .replace(/<embed[^>]*>/gi, '')
+      .replace(/<object[^>]*>[\s\S]*?<\/object>/gi, '')
+
+    // Step 2: Extract text content while preserving structure
+    // Convert block elements to newlines
+    cleanedHtml = cleanedHtml
+      .replace(/<\/?(div|p|br|h[1-6]|li|tr|td|th|section|article|blockquote)[^>]*>/gi, '\n')
+      .replace(/<\/?(ul|ol|table|thead|tbody)[^>]*>/gi, '\n\n')
+      // Convert code blocks to preserve them
+      .replace(/<pre[^>]*>([\s\S]*?)<\/pre>/gi, '\n```\n$1\n```\n')
+      .replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, '`$1`')
+      // Remove remaining HTML tags
+      .replace(/<[^>]+>/g, ' ')
+      // Decode HTML entities
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&mdash;/g, '—')
+      .replace(/&ndash;/g, '–')
+      // Clean up whitespace
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
       .trim()
 
-    console.log(`📄 Cleaned HTML size: ${cleanedHtml.length} (original: ${html.length})`)
+    console.log(`📄 Extracted text size: ${cleanedHtml.length} chars (original HTML: ${html.length})`)
 
-    const prompt = `
-You are an expert web content extractor. Your task is to extract ALL meaningful content from the provided HTML.
+    // Step 3: Limit content to fit within token limits (~4 chars per token, leave room for prompt)
+    const maxChars = 60000 // ~15k tokens for content, leaving room for prompt and response
+    if (cleanedHtml.length > maxChars) {
+      console.log(`⚠️ Content too large (${cleanedHtml.length}), truncating to ${maxChars} chars`)
+      cleanedHtml = cleanedHtml.substring(0, maxChars) + '\n\n[Content truncated due to size...]'
+    }
+
+    const prompt = `You are an expert web content extractor. Extract the main content from this text.
 
 URL: ${url}
 
-CRITICAL INSTRUCTIONS:
-1. Extract EVERYTHING that is actual content - articles, documentation, tutorials, code examples, etc.
-2. Do NOT truncate or summarize the main content - preserve it completely
-3. Remove only: navigation menus, advertisements, cookie banners, sidebar links, footer links
-4. KEEP: All paragraphs, all headings, all lists, all code blocks, all important text
-5. Preserve the logical structure with headings and sections
-6. For documentation/tutorial pages: include ALL code examples and explanations
-7. For articles: include the complete article text
-8. Extract metadata if available (author, date, description)
-9. ${extractKeyTopics ? 'Identify 8-15 key topics covering all main themes' : 'Skip topics'}
-10. ${summarize ? 'Create a comprehensive 3-5 sentence summary' : 'Skip summary'}
+TEXT CONTENT:
+${cleanedHtml}
 
-HTML Content (cleaned):
-${cleanedHtml.substring(0, 150000)}
-
-Respond with a JSON object:
+Extract and return a JSON object with:
 {
   "title": "Page title",
-  "content": "COMPLETE extracted content - do not truncate",
-  "summary": "3-5 sentence summary",
-  "keyTopics": ["topic1", "topic2", ...],
-  "contentType": "article|documentation|blog|news|academic|general",
+  "content": "The complete main content text (preserve all important information)",
+  "summary": "2-3 sentence summary",
+  "keyTopics": ["topic1", "topic2", "topic3", "topic4", "topic5"],
+  "contentType": "documentation|article|blog|news|academic|general",
   "metadata": {
-    "author": "Author if found or null",
-    "publishedDate": "Date if found or null",
-    "description": "Meta description or null",
+    "author": "author or null",
+    "publishedDate": "date or null",
+    "description": "description or null",
     "language": "en"
   }
 }
 
-IMPORTANT: The content field should contain ALL the main text from the page. Do not limit or truncate it.
-`
+IMPORTANT: Preserve ALL the main content. Include code examples, explanations, and all text sections.`
 
     const result = await generateText({
-      model: openai('gpt-4o'), // Using more capable model for comprehensive extraction
+      model: openai('gpt-4o-mini'), // Using gpt-4o-mini for higher rate limits
       prompt,
       temperature: 0.1,
     })
