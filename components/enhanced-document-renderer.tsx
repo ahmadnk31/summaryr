@@ -355,15 +355,15 @@ export function EnhancedDocumentRenderer({
 
   return (
     <>
-      <Card ref={containerRef} className="h-full">
-        <CardHeader>
-          <div className="flex items-start justify-between">
+      <Card ref={containerRef} className="h-full overflow-x-auto w-full max-w-4xl mx-auto sm:rounded-lg shadow-sm bg-background">
+        <CardHeader className="pb-0">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex-1 min-w-0">
               <CardTitle className="flex items-center gap-2 mb-2">
                 {isWeb ? (
                   <>
                     <ExternalLink className="h-5 w-5 text-blue-500" />
-                    <span className="truncate">
+                    <span className="truncate overflow-x-auto block max-w-full">
                       {webInfo?.displayTitle || document.title || 'Web Content'}
                     </span>
                   </>
@@ -376,7 +376,7 @@ export function EnhancedDocumentRenderer({
               </CardTitle>
             
             {/* Document metadata */}
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground">
               <Badge variant="secondary">
                 {isWeb ? 'Web Page' : document.file_type.toUpperCase()}
               </Badge>
@@ -399,7 +399,7 @@ export function EnhancedDocumentRenderer({
 
             {/* Web-specific metadata */}
             {isWeb && webInfo?.metadata && (
-              <div className="mt-3 space-y-2">
+              <div className="mt-3 space-y-2 max-w-full break-words">
                 {webInfo.metadata.sourceUrl && (
                   <div className="flex items-center gap-2 text-sm">
                     <ExternalLink className="h-3 w-3 text-blue-500" />
@@ -414,7 +414,7 @@ export function EnhancedDocumentRenderer({
                   </div>
                 )}
                 
-                <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                <div className="flex flex-wrap gap-3 text-xs sm:text-sm text-muted-foreground">
                   {webInfo.metadata.author && (
                     <div className="flex items-center gap-1">
                       <User className="h-3 w-3" />
@@ -439,8 +439,8 @@ export function EnhancedDocumentRenderer({
 
                 {webInfo.metadata.keyTopics && webInfo.metadata.keyTopics.length > 0 && (
                   <div className="mt-3">
-                    <p className="text-sm font-medium mb-2">Key Topics</p>
-                    <div className="flex flex-wrap gap-1">
+                    <p className="text-xs sm:text-sm font-medium mb-2">Key Topics</p>
+                    <div className="flex flex-wrap gap-1 overflow-x-auto max-w-full">
                       {webInfo.metadata.keyTopics.slice(0, 8).map((topic, index) => (
                         <Badge key={index} variant="outline" className="text-xs">
                           {topic}
@@ -459,7 +459,7 @@ export function EnhancedDocumentRenderer({
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center gap-2 ml-4">
+          <div className="flex flex-row flex-wrap items-center gap-2 ml-0 sm:ml-4 mt-4 sm:mt-0">
             <Button
               variant="outline"
               size="sm"
@@ -494,11 +494,14 @@ export function EnhancedDocumentRenderer({
         </div>
       </CardHeader>
 
-      <CardContent className="pt-0 max-h-[calc(100vh-16rem)] overflow-y-scroll">
+  <CardContent className="pt-0 max-h-[calc(100vh-12rem)] sm:max-h-[calc(100vh-16rem)] overflow-y-auto">
         <div className="border-t mb-6" />
-        
         {/* Rendered content */}
-        <div ref={contentRef} className="max-w-none select-text" style={{ userSelect: "text" }}>
+        <div
+          ref={contentRef}
+          className="max-w-full sm:max-w-none select-text text-xs sm:text-base leading-relaxed break-words"
+          style={{ userSelect: "text" }}
+        >
           {(() => {
             // Separate metadata and main content
             const metadataSections = contentSections.filter(section => section.type === 'metadata')
@@ -517,15 +520,15 @@ export function EnhancedDocumentRenderer({
             })
             
             return (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Render metadata sections first */}
                 {metadataSections.length > 0 && (
-                  <div className="space-y-4">
+                  <div className="space-y-2 sm:space-y-4">
                     {metadataSections.map((section, index) => {
                       if (section.content.match(/^(Title|Author|Published|Key Topics):/i)) {
                         const [label, ...rest] = section.content.split(':')
                         return (
-                          <div key={index} className="flex gap-2 text-sm">
+                          <div key={index} className="flex gap-2 text-xs sm:text-sm flex-wrap">
                             <span className="font-semibold text-primary min-w-[80px]">
                               {label.trim()}:
                             </span>
@@ -538,7 +541,7 @@ export function EnhancedDocumentRenderer({
                       if (section.content.match(/^Summary:/i)) {
                         const [, ...rest] = section.content.split(':')
                         return (
-                          <div key={index} className="p-4 bg-muted/30 rounded-lg border">
+                          <div key={index} className="p-2 sm:p-4 bg-muted/30 rounded-lg border">
                             <h4 className="font-semibold text-primary mb-2">Summary</h4>
                             <p className="text-sm leading-relaxed">
                               {rest.join(':').trim()}
@@ -555,7 +558,7 @@ export function EnhancedDocumentRenderer({
                 {mainContent && (
                   <div className="mt-6">
                     <div>
-                      <h3 className="text-lg font-semibold text-primary border-b pb-2 mb-4">
+                      <h3 className="text-base sm:text-lg font-semibold text-primary border-b pb-2 mb-4">
                         Content
                       </h3>
                       <MarkdownRenderer content={mainContent} />

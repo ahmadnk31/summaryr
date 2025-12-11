@@ -8,7 +8,8 @@ import { generateText } from "ai"
 
 export interface ScrapedContent {
   title: string
-  content: string
+  content: string // Now contains HTML or Markdown
+  contentFormat: 'html' | 'markdown'
   url: string
   summary: string
   keyTopics: string[]
@@ -29,6 +30,7 @@ export interface ScrapeOptions {
   extractKeyTopics?: boolean
   summarize?: boolean
   contentType?: 'auto' | 'article' | 'documentation' | 'blog' | 'news' | 'academic'
+  outputFormat?: 'html' | 'markdown' // New option to choose output format
 }
 
 /**
@@ -57,7 +59,7 @@ async function fetchPageContent(url: string): Promise<{ html: string; title: str
         'Upgrade-Insecure-Requests': '1',
       },
       redirect: 'follow',
-      signal: AbortSignal.timeout(45000), // Increased timeout for larger pages
+      signal: AbortSignal.timeout(45000),
     })
 
     if (!response.ok) {
@@ -72,7 +74,6 @@ async function fetchPageContent(url: string): Promise<{ html: string; title: str
     const html = await response.text()
     console.log(`✅ Successfully fetched ${html.length} bytes`)
     
-    // Extract basic title from HTML
     const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
     const title = titleMatch ? titleMatch[1].trim() : 'Untitled Page'
 
@@ -84,17 +85,11 @@ async function fetchPageContent(url: string): Promise<{ html: string; title: str
       const errorMessage = error.message.toLowerCase()
       if (errorMessage.includes('fetch failed') || errorMessage.includes('network')) {
         throw new Error(
-          `Network error: Unable to connect to ${url}. This could be due to:
-` +
-          `- SSL/TLS certificate issues
-` +
-          `- Network connectivity problems
-` +
-          `- The server blocking automated requests
-` +
-          `- CORS or firewall restrictions
-
-` +
+          `Network error: Unable to connect to ${url}. This could be due to:\n` +
+          `- SSL/TLS certificate issues\n` +
+          `- Network connectivity problems\n` +
+          `- The server blocking automated requests\n` +
+          `- CORS or firewall restrictions\n\n` +
           `Try using a publicly accessible URL or check if the site is reachable.`
         )
       }
@@ -118,71 +113,98 @@ async function extractContentWithAI(
   options: ScrapeOptions = {}
 ): Promise<ScrapedContent> {
   const {
-    maxContentLength = 10000,
+    maxContentLength = 5000000,
     includeMetadata = true,
     extractKeyTopics = true,
     summarize = true,
-    contentType = 'auto'
+    contentType = 'auto',
+    outputFormat = 'markdown' // Default to markdown
   } = options
 
   try {
+    const cleanedHtml = html
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '')
+      .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+      .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+      .replace(/<[^>]+hidden[^>]*>[\s\S]*?<\/[^>]+>/gi, '')
+      .replace(/<div[^>]*(?:ad-|ads-|advertisement|tracking|cookie|banner)[^>]*>[\s\S]*?<\/div>/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    console.log(`📄 Cleaned HTML size: ${cleanedHtml.length} (original: ${html.length})`)
+
+    const formatInstructions = outputFormat === 'markdown' 
+      ? `Format the content in clean, readable MARKDOWN:
+- Use # for main title, ## for sections, ### for subsections
+- Use **bold** for emphasis and *italic* for secondary emphasis
+- Use \`code\` for inline code and \`\`\`language blocks for code examples
+- Use > for blockquotes
+- Use - or * for unordered lists, 1. for ordered lists
+- Use [text](url) for links
+- Preserve all code blocks with proper language tags
+- Use --- for horizontal rules between major sections
+- Format tables using markdown table syntax if present`
+      : `Format the content as clean, semantic HTML:
+- Use proper heading tags: <h1> for title, <h2> for sections, <h3> for subsections
+- Use <p> for paragraphs
+- Use <strong> for bold, <em> for italic
+- Use <code> for inline code and <pre><code class="language-x"> for code blocks
+- Use <blockquote> for quotes
+- Use <ul>/<ol> with <li> for lists
+- Use <a href=""> for links
+- Use <hr> for horizontal rules between major sections
+- Wrap everything in semantic tags, NO bare text`
+
     const prompt = `
-You are an expert web content extractor. Your task is to analyze the provided HTML and extract ALL meaningful content from the page.
+You are an expert web content extractor. Your task is to extract ALL meaningful content from the provided HTML and format it properly.
 
 URL: ${url}
 
-Instructions:
-1. Extract ALL main textual content - do not truncate or limit the content significantly
-2. Remove only true non-content elements (navigation menus, ads, footers, cookie banners, sidebars with just links)
-3. PRESERVE all article content, body text, headings, lists, important sections
-4. Include content from multiple sections if they contain valuable information
-5. Maintain paragraph structure and important formatting cues
-6. Identify the content type (article, documentation, blog, news, academic, general)
-7. Extract metadata like author, published date, description if available
-8. ${extractKeyTopics ? 'Generate 8-15 key topics/keywords that represent all main themes' : 'Skip key topics extraction'}
-9. ${summarize ? 'Create a comprehensive summary (3-5 sentences) covering all major points' : 'Skip summary generation'}
-10. Clean up HTML tags but preserve text structure and readability
-11. Do NOT artificially limit content to ${maxContentLength} characters - extract everything important
+CRITICAL INSTRUCTIONS:
+1. Extract EVERYTHING that is actual content - articles, documentation, tutorials, code examples, etc.
+2. Do NOT truncate or summarize the main content - preserve it completely
+3. Remove only: navigation menus, advertisements, cookie banners, sidebar links, footer links
+4. KEEP: All paragraphs, all headings, all lists, all code blocks, all important text
+5. ${formatInstructions}
+6. For documentation/tutorial pages: include ALL code examples with proper syntax highlighting
+7. For articles: include the complete article text with proper formatting
+8. Maintain the logical structure and hierarchy
+9. Extract metadata if available (author, date, description)
+10. ${extractKeyTopics ? 'Identify 8-15 key topics covering all main themes' : 'Skip topics'}
+11. ${summarize ? 'Create a comprehensive 3-5 sentence summary' : 'Skip summary'}
 
-HTML Content:
-${html.substring(0, 100000)} ${html.length > 100000 ? '...[truncated for processing]' : ''}
+HTML Content (cleaned):
+${cleanedHtml.substring(0, 150000)}
 
-CRITICAL: Extract as much meaningful content as possible. This is for study purposes, so comprehensive content is essential.
-
-Please respond with a JSON object in this exact format:
+Respond with a JSON object where the "content" field contains properly formatted ${outputFormat.toUpperCase()}:
 {
-  "title": "Extracted page title",
-  "content": "COMPREHENSIVE main textual content with ALL important information",
-  "summary": "Comprehensive 3-5 sentence summary covering all major points",
-  "keyTopics": ["topic1", "topic2", "topic3", "topic4", "topic5", "topic6", "topic7", "topic8"],
+  "title": "Page title",
+  "content": "COMPLETE ${outputFormat} formatted content - do not truncate",
+  "summary": "3-5 sentence summary",
+  "keyTopics": ["topic1", "topic2", ...],
   "contentType": "article|documentation|blog|news|academic|general",
   "metadata": {
-    "author": "Author name if found",
-    "publishedDate": "Publication date if found",
-    "description": "Meta description if found",
-    "language": "Content language (e.g., 'en')"
+    "author": "Author if found or null",
+    "publishedDate": "Date if found or null",
+    "description": "Meta description or null",
+    "language": "en"
   }
 }
 
-Important:
-- Ensure the JSON is valid and properly escaped
-- If information is not available, use null for strings or empty array for arrays
-- Preserve ALL meaningful content, headings, and important text
-- Remove HTML tags and clean up formatting
-- Focus on comprehensive extraction, not brevity
-- Include content from all important sections of the page
+CRITICAL: The content field must be valid ${outputFormat.toUpperCase()} with proper formatting. Include ALL content from the page.
 `
 
     const result = await generateText({
-      model: openai('gpt-4o-mini'), // Using cost-effective model for web scraping
+      model: openai('gpt-4o'),
       prompt,
-      temperature: 0.1, // Low temperature for consistent extraction
+      temperature: 0.1,
     })
 
-    // Parse the AI response
     let parsedResult: any
     try {
-      // Clean up the response to extract JSON
       const jsonMatch = result.text.match(/\{[\s\S]*\}/);
       const jsonString = jsonMatch ? jsonMatch[0] : result.text;
       parsedResult = JSON.parse(jsonString)
@@ -190,10 +212,11 @@ Important:
       console.error('Failed to parse AI response as JSON:', parseError)
       console.error('AI Response:', result.text)
       
-      // Fallback: extract content manually
+      // Fallback: return the raw response formatted as markdown
       return {
         title: html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim() || 'Untitled Page',
         content: result.text.substring(0, maxContentLength),
+        contentFormat: outputFormat,
         url,
         summary: 'Content extracted from web page',
         keyTopics: [],
@@ -204,10 +227,10 @@ Important:
       }
     }
 
-    // Construct the final result
     const scrapedContent: ScrapedContent = {
       title: parsedResult.title || 'Untitled Page',
       content: parsedResult.content || '',
+      contentFormat: outputFormat,
       url,
       summary: parsedResult.summary || '',
       keyTopics: Array.isArray(parsedResult.keyTopics) ? parsedResult.keyTopics : [],
@@ -245,14 +268,13 @@ async function retryWithBackoff<T>(
     } catch (error) {
       lastError = error as Error
       
-      // Don't retry on certain errors
       const errorMessage = lastError.message.toLowerCase()
       if (
         errorMessage.includes('http 404') ||
         errorMessage.includes('http 403') ||
         errorMessage.includes('not return html')
       ) {
-        throw lastError // Don't retry permanent failures
+        throw lastError
       }
       
       if (attempt < maxRetries) {
@@ -273,17 +295,15 @@ export async function scrapeWebPage(url: string, options: ScrapeOptions = {}): P
   try {
     console.log(`Starting to scrape: ${url}`)
     
-    // Step 1: Fetch the HTML content with retry logic
     const { html, title } = await retryWithBackoff(
       () => fetchPageContent(url),
-      3, // Max 3 attempts
-      1000 // Start with 1s delay
+      3,
+      1000
     )
     console.log(`✅ Fetched HTML content, title: ${title}`)
     
-    // Step 2: Extract content using OpenAI
     const scrapedContent = await extractContentWithAI(html, url, options)
-    console.log(`✅ Successfully extracted content: ${scrapedContent.wordCount} words`)
+    console.log(`✅ Successfully extracted ${scrapedContent.contentFormat} content: ${scrapedContent.wordCount} words`)
     
     return scrapedContent
   } catch (error) {
@@ -303,7 +323,6 @@ export function validateUrl(url: string): { isValid: boolean; error?: string } {
       return { isValid: false, error: 'Only HTTP and HTTPS URLs are supported' }
     }
     
-    // Block some non-scrapeable domains
     const blockedDomains = ['localhost', '127.0.0.1', '0.0.0.0']
     if (blockedDomains.some(domain => urlObj.hostname.includes(domain))) {
       return { isValid: false, error: 'Local URLs are not supported' }
@@ -316,7 +335,7 @@ export function validateUrl(url: string): { isValid: boolean; error?: string } {
 }
 
 /**
- * Extract text content for document processing
+ * Extract text content for document processing (strips formatting)
  */
 export function extractTextFromScrapedContent(content: ScrapedContent): string {
   const sections = []
@@ -344,4 +363,23 @@ export function extractTextFromScrapedContent(content: ScrapedContent): string {
   sections.push(`\nMain Content:\n${content.content}`)
   
   return sections.join('\n\n')
+}
+
+/**
+ * Helper to convert markdown to HTML if needed
+ */
+export function convertMarkdownToHtml(markdown: string): string {
+  // Basic markdown to HTML conversion
+  // For production, use a library like 'marked' or 'markdown-it'
+  return markdown
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/, '<ul>$1</ul>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/^(.+)$/gm, '<p>$1</p>')
 }
