@@ -90,17 +90,9 @@ export function EnhancedDocumentRenderer({
       if (text && text.length > 0 && selection && selection.rangeCount > 0) {
         try {
           const range = selection.getRangeAt(0)
-          
-          // Check if selection is within our content area
-          const contentElement = contentRef.current
-          if (contentElement && !contentElement.contains(range.commonAncestorContainer)) {
-            // Selection is outside our content, ignore it
-            return
-          }
-          
           const rect = range.getBoundingClientRect()
 
-          if (rect && rect.width > 0 && rect.height > 0) {
+          if (rect) {
             setSelectedText(text)
             
             // Get container bounds to constrain toolbar within document viewer
@@ -170,7 +162,6 @@ export function EnhancedDocumentRenderer({
           }
         }
       } else {
-        // Only hide if we're really losing selection
         hideTimeoutRef.current = setTimeout(() => {
           const currentSelection = window.getSelection()
           const currentText = currentSelection?.toString().trim()
@@ -194,35 +185,26 @@ export function EnhancedDocumentRenderer({
   // Toolbar action handlers
   const handleCreateFlashcard = () => {
     onCreateFlashcard(selectedText)
-    // Delay hiding toolbar and clearing selection to allow dialog to open
-    setTimeout(() => {
-      setShowToolbar(false)
-      window.getSelection()?.removeAllRanges()
-    }, 100)
+    setShowToolbar(false)
+    window.getSelection()?.removeAllRanges()
   }
 
   const handleCreateQuestion = () => {
     onCreateQuestion(selectedText)
-    setTimeout(() => {
-      setShowToolbar(false)
-      window.getSelection()?.removeAllRanges()
-    }, 100)
+    setShowToolbar(false)
+    window.getSelection()?.removeAllRanges()
   }
 
   const handleSummarize = () => {
     onSummarize(selectedText)
-    setTimeout(() => {
-      setShowToolbar(false)
-      window.getSelection()?.removeAllRanges()
-    }, 100)
+    setShowToolbar(false)
+    window.getSelection()?.removeAllRanges()
   }
 
   const handleExplain = () => {
     onExplain(selectedText)
-    setTimeout(() => {
-      setShowToolbar(false)
-      window.getSelection()?.removeAllRanges()
-    }, 100)
+    setShowToolbar(false)
+    window.getSelection()?.removeAllRanges()
   }
 
   const handleCreateNote = () => {
@@ -239,10 +221,8 @@ export function EnhancedDocumentRenderer({
     } else {
       onCreateNote(selectedText)
     }
-    setTimeout(() => {
-      setShowToolbar(false)
-      window.getSelection()?.removeAllRanges()
-    }, 100)
+    setShowToolbar(false)
+    window.getSelection()?.removeAllRanges()
   }
   
   const isWeb = isWebDocument(document)
@@ -570,19 +550,5 @@ export function EnhancedDocumentRenderer({
         )}
       </CardContent>
     </Card>
-
-    {showToolbar && (
-      <TextSelectionToolbar
-        selectedText={selectedText}
-        position={toolbarPosition}
-        containerRef={containerRef as React.RefObject<HTMLElement>}
-        onCreateFlashcard={handleCreateFlashcard}
-        onCreateQuestion={handleCreateQuestion}
-        onSummarize={handleSummarize}
-        onExplain={handleExplain}
-        onCreateNote={handleCreateNote}
-      />
-    )}
-  </>
   )
 }

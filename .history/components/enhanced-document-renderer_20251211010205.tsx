@@ -44,206 +44,10 @@ const isMarkdownContent = (content: string): boolean => {
 
 interface EnhancedDocumentRendererProps {
   document: Document
-  onCreateFlashcard: (text: string) => void
-  onCreateQuestion: (text: string) => void
-  onSummarize: (text: string) => void
-  onExplain: (text: string) => void
-  onCreateNote: (text: string, startOffset?: number, endOffset?: number) => void
 }
 
-export function EnhancedDocumentRenderer({ 
-  document,
-  onCreateFlashcard,
-  onCreateQuestion,
-  onSummarize,
-  onExplain,
-  onCreateNote
-}: EnhancedDocumentRendererProps) {
+export function EnhancedDocumentRenderer({ document }: EnhancedDocumentRendererProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedText, setSelectedText] = useState("")
-  const [showToolbar, setShowToolbar] = useState(false)
-  const [toolbarPosition, setToolbarPosition] = useState({ x: 0, y: 0 })
-  
-  const containerRef = useRef<HTMLDivElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
-  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const showToolbarRef = useRef(false)
-
-  // Keep ref in sync with state
-  useEffect(() => {
-    showToolbarRef.current = showToolbar
-  }, [showToolbar])
-
-  // Handle text selection
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const handleSelection = () => {
-      if (hideTimeoutRef.current) {
-        clearTimeout(hideTimeoutRef.current)
-        hideTimeoutRef.current = null
-      }
-
-      const selection = window.getSelection()
-      const text = selection?.toString().trim()
-
-      if (text && text.length > 0 && selection && selection.rangeCount > 0) {
-        try {
-          const range = selection.getRangeAt(0)
-          
-          // Check if selection is within our content area
-          const contentElement = contentRef.current
-          if (contentElement && !contentElement.contains(range.commonAncestorContainer)) {
-            // Selection is outside our content, ignore it
-            return
-          }
-          
-          const rect = range.getBoundingClientRect()
-
-          if (rect && rect.width > 0 && rect.height > 0) {
-            setSelectedText(text)
-            
-            // Get container bounds to constrain toolbar within document viewer
-            const containerElement = containerRef.current
-            let containerRect: DOMRect | null = null
-            
-            if (containerElement) {
-              containerRect = containerElement.getBoundingClientRect()
-            }
-            
-            // Calculate position based on the selection
-            let x = rect.left + rect.width / 2
-            let y = rect.bottom
-            
-            // If we have container bounds, constrain to container
-            if (containerRect) {
-              const containerLeft = containerRect.left
-              const containerRight = containerRect.right
-              const containerTop = containerRect.top
-              const containerBottom = containerRect.bottom
-              
-              // Clamp x to container bounds with padding
-              const padding = 50
-              x = Math.max(containerLeft + padding, Math.min(x, containerRight - padding))
-              
-              // Clamp y to container bounds
-              if (y > containerBottom) {
-                y = Math.min(rect.top, containerBottom - 100)
-              }
-              if (y < containerTop) {
-                y = Math.max(rect.bottom, containerTop + 100)
-              }
-              
-              y = Math.max(containerTop + 50, Math.min(y, containerBottom - 50))
-            } else {
-              // Fallback to viewport if container not found
-              const viewportWidth = window.innerWidth
-              const viewportHeight = window.innerHeight
-              
-              x = Math.max(50, Math.min(x, viewportWidth - 50))
-              
-              if (y > viewportHeight) {
-                y = Math.min(rect.top, viewportHeight - 100)
-              }
-              if (y < 0) {
-                y = Math.max(rect.bottom, 100)
-              }
-            }
-            
-            setToolbarPosition({ x, y })
-            setShowToolbar(true)
-          } else if (text.length > 0) {
-            setSelectedText(text)
-            if (!showToolbarRef.current) {
-              setShowToolbar(true)
-            }
-          }
-        } catch (error) {
-          if (text && text.length > 0) {
-            setSelectedText(text)
-            if (!showToolbarRef.current) {
-              setShowToolbar(true)
-            }
-          } else {
-            setShowToolbar(false)
-            setSelectedText("")
-          }
-        }
-      } else {
-        // Only hide if we're really losing selection
-        hideTimeoutRef.current = setTimeout(() => {
-          const currentSelection = window.getSelection()
-          const currentText = currentSelection?.toString().trim()
-          if (!currentText || currentText.length === 0 || !currentSelection || currentSelection.rangeCount === 0) {
-            setShowToolbar(false)
-            setSelectedText("")
-          }
-        }, 150)
-      }
-    }
-
-    globalThis.document.addEventListener("selectionchange", handleSelection)
-    return () => {
-      globalThis.document.removeEventListener("selectionchange", handleSelection)
-      if (hideTimeoutRef.current) {
-        clearTimeout(hideTimeoutRef.current)
-      }
-    }
-  }, [])
-
-  // Toolbar action handlers
-  const handleCreateFlashcard = () => {
-    onCreateFlashcard(selectedText)
-    // Delay hiding toolbar and clearing selection to allow dialog to open
-    setTimeout(() => {
-      setShowToolbar(false)
-      window.getSelection()?.removeAllRanges()
-    }, 100)
-  }
-
-  const handleCreateQuestion = () => {
-    onCreateQuestion(selectedText)
-    setTimeout(() => {
-      setShowToolbar(false)
-      window.getSelection()?.removeAllRanges()
-    }, 100)
-  }
-
-  const handleSummarize = () => {
-    onSummarize(selectedText)
-    setTimeout(() => {
-      setShowToolbar(false)
-      window.getSelection()?.removeAllRanges()
-    }, 100)
-  }
-
-  const handleExplain = () => {
-    onExplain(selectedText)
-    setTimeout(() => {
-      setShowToolbar(false)
-      window.getSelection()?.removeAllRanges()
-    }, 100)
-  }
-
-  const handleCreateNote = () => {
-    const selection = window.getSelection()
-    if (selection && contentRef.current) {
-      const range = selection.getRangeAt(0)
-      const preSelectionRange = range.cloneRange()
-      preSelectionRange.selectNodeContents(contentRef.current)
-      preSelectionRange.setEnd(range.startContainer, range.startOffset)
-      const start = preSelectionRange.toString().length
-      const end = start + selectedText.length
-
-      onCreateNote(selectedText, start, end)
-    } else {
-      onCreateNote(selectedText)
-    }
-    setTimeout(() => {
-      setShowToolbar(false)
-      window.getSelection()?.removeAllRanges()
-    }, 100)
-  }
   
   const isWeb = isWebDocument(document)
   const webInfo = isWeb && document.extracted_text ? formatWebDocumentInfo(document.extracted_text) : null
@@ -349,26 +153,25 @@ export function EnhancedDocumentRenderer({
   const contentSections = parseContentSections(content)
 
   return (
-    <>
-      <Card ref={containerRef} className="h-full">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <CardTitle className="flex items-center gap-2 mb-2">
-                {isWeb ? (
-                  <>
-                    <ExternalLink className="h-5 w-5 text-blue-500" />
-                    <span className="truncate">
-                      {webInfo?.displayTitle || document.title || 'Web Content'}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <FileText className="h-5 w-5 text-primary" />
-                    <span className="truncate">{document.title || document.file_name}</span>
-                  </>
-                )}
-              </CardTitle>
+    <Card className="h-full">
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="flex items-center gap-2 mb-2">
+              {isWeb ? (
+                <>
+                  <ExternalLink className="h-5 w-5 text-blue-500" />
+                  <span className="truncate">
+                    {webInfo?.displayTitle || document.title || 'Web Content'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <FileText className="h-5 w-5 text-primary" />
+                  <span className="truncate">{document.title || document.file_name}</span>
+                </>
+              )}
+            </CardTitle>
             
             {/* Document metadata */}
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -493,7 +296,7 @@ export function EnhancedDocumentRenderer({
         <div className="border-t mb-6" />
         
         {/* Rendered content */}
-        <div ref={contentRef} className="max-w-none select-text" style={{ userSelect: "text" }}>
+        <div className="max-w-none">
           {(() => {
             // Separate metadata and main content
             const metadataSections = contentSections.filter(section => section.type === 'metadata')
@@ -570,19 +373,5 @@ export function EnhancedDocumentRenderer({
         )}
       </CardContent>
     </Card>
-
-    {showToolbar && (
-      <TextSelectionToolbar
-        selectedText={selectedText}
-        position={toolbarPosition}
-        containerRef={containerRef as React.RefObject<HTMLElement>}
-        onCreateFlashcard={handleCreateFlashcard}
-        onCreateQuestion={handleCreateQuestion}
-        onSummarize={handleSummarize}
-        onExplain={handleExplain}
-        onCreateNote={handleCreateNote}
-      />
-    )}
-  </>
   )
 }

@@ -90,17 +90,9 @@ export function EnhancedDocumentRenderer({
       if (text && text.length > 0 && selection && selection.rangeCount > 0) {
         try {
           const range = selection.getRangeAt(0)
-          
-          // Check if selection is within our content area
-          const contentElement = contentRef.current
-          if (contentElement && !contentElement.contains(range.commonAncestorContainer)) {
-            // Selection is outside our content, ignore it
-            return
-          }
-          
           const rect = range.getBoundingClientRect()
 
-          if (rect && rect.width > 0 && rect.height > 0) {
+          if (rect) {
             setSelectedText(text)
             
             // Get container bounds to constrain toolbar within document viewer
@@ -170,7 +162,6 @@ export function EnhancedDocumentRenderer({
           }
         }
       } else {
-        // Only hide if we're really losing selection
         hideTimeoutRef.current = setTimeout(() => {
           const currentSelection = window.getSelection()
           const currentText = currentSelection?.toString().trim()
