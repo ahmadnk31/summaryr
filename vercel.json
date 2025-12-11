@@ -1,0 +1,9 @@
+{
+  "functions": {
+    "app/api/documents/[id]/render/route.ts": {
+      "memory": 3008,
+      "maxDuration": 30
+    }
+  },
+  "buildCommand": "pnpm run build"
+}

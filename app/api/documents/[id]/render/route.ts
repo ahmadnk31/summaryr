@@ -10,25 +10,48 @@ async function generatePDF(html: string): Promise<Buffer> {
   
   try {
     // Configure puppeteer for development vs production
-    const browserConfig = isDevelopment
-      ? {
-          // Development: try to use local Chrome
-          executablePath: process.platform === 'darwin' 
-            ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-            : process.platform === 'linux'
-            ? '/usr/bin/google-chrome'
-            : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-          headless: true,
-          args: ['--no-sandbox', '--disable-setuid-sandbox']
-        }
-      : {
-          // Production: use Chromium from @sparticuz/chromium
-          args: chromium.args,
-          executablePath: await chromium.executablePath(),
-          headless: true,
-        }
+    let browserConfig
+    
+    if (isDevelopment) {
+      // Development: use local Chrome/Chromium
+      const chromePath = process.platform === 'darwin' 
+        ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+        : process.platform === 'linux'
+        ? '/usr/bin/google-chrome'
+        : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+      
+      browserConfig = {
+        executablePath: chromePath,
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu'
+        ]
+      }
+      console.log('🔄 Development mode: Using local Chrome at', chromePath)
+    } else {
+      // Production: use Chromium from @sparticuz/chromium
+      // Set the path to /tmp for Vercel serverless functions
+      await chromium.font(
+        'https://raw.githack.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf'
+      )
+      
+      browserConfig = {
+        args: [
+          ...chromium.args,
+          '--disable-dev-shm-usage',
+          '--disable-setuid-sandbox',
+          '--no-sandbox',
+        ],
+        executablePath: await chromium.executablePath('/tmp/chromium'),
+        headless: true,
+      }
+      console.log('🔄 Production mode: Using @sparticuz/chromium')
+    }
 
-    console.log('🔄 Launching browser with config:', browserConfig)
+    console.log('🔄 Launching browser...')
     browser = await puppeteer.launch(browserConfig)
 
     const page = await browser.newPage()

@@ -20,6 +20,8 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  // Configure external packages for serverless functions
+  serverExternalPackages: ['@sparticuz/chromium', 'puppeteer-core'],
 }
 
 export default nextConfig
