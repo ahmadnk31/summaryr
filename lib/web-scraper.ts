@@ -211,7 +211,8 @@ Extract and return a JSON object with:
   }
 }
 
-IMPORTANT: Preserve ALL the main content. Include code examples, explanations, and all text sections.`
+IMPORTANT: Preserve ALL the main content. Include code examples, explanations, and all text sections.
+Return ONLY valid JSON without markdown code blocks.`
 
     const result = await generateText({
       model: openai('gpt-4o-mini'), // Using gpt-4o-mini for higher rate limits
@@ -223,17 +224,48 @@ IMPORTANT: Preserve ALL the main content. Include code examples, explanations, a
     let parsedResult: any
     try {
       // Clean up the response to extract JSON
-      const jsonMatch = result.text.match(/\{[\s\S]*\}/);
-      const jsonString = jsonMatch ? jsonMatch[0] : result.text;
-      parsedResult = JSON.parse(jsonString)
+      let jsonString = result.text
+      
+      // Remove markdown code blocks if present
+      jsonString = jsonString.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '')
+      
+      // Try to find JSON object
+      const jsonMatch = jsonString.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        jsonString = jsonMatch[0]
+      }
+      
+      // Fix common JSON issues - escape newlines in string values
+      // This handles cases where the content field has unescaped newlines
+      jsonString = jsonString.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t')
+      
+      // But we need to restore actual JSON structure newlines
+      // Parse by trying multiple approaches
+      try {
+        parsedResult = JSON.parse(jsonString)
+      } catch {
+        // Try a more aggressive cleanup - remove control characters
+        const cleanJson = jsonString
+          .replace(/[\x00-\x1F\x7F]/g, (char) => {
+            if (char === '\n' || char === '\\n') return '\\n'
+            if (char === '\r' || char === '\\r') return '\\r'
+            if (char === '\t' || char === '\\t') return '\\t'
+            return ''
+          })
+        parsedResult = JSON.parse(cleanJson)
+      }
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError)
-      console.error('AI Response:', result.text)
+      console.error('AI Response (first 500 chars):', result.text.substring(0, 500))
       
-      // Fallback: extract content manually
+      // Fallback: use the extracted text directly
+      // Extract title from the response if possible
+      const titleMatch = result.text.match(/"title":\s*"([^"]+)"/)
+      const contentMatch = result.text.match(/"content":\s*"([\s\S]*?)(?:","summary"|$)/)
+      
       return {
-        title: html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim() || 'Untitled Page',
-        content: result.text.substring(0, maxContentLength),
+        title: titleMatch?.[1] || html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim() || 'Untitled Page',
+        content: contentMatch?.[1] || result.text.substring(0, maxContentLength),
         url,
         summary: 'Content extracted from web page',
         keyTopics: [],
