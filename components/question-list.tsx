@@ -121,15 +121,26 @@ export function QuestionList({ documentId, refreshKey }: QuestionListProps) {
   }
 
   const submitAnswer = (questionId: string) => {
-    const userAnswer = userAnswers.get(questionId)?.trim() || ""
+    let userAnswer = userAnswers.get(questionId)?.trim() || ""
     const question = questions.find((q) => q.id === questionId)
-    const correctAnswer = question?.answer_text.trim() || ""
+    let correctAnswer = question?.answer_text.trim() || ""
+    
+    // For MCQ, strip the letter prefix (A), B), C), D), etc.) from the user's answer
+    if (question?.question_type === 'multiple_choice') {
+      // Remove the letter prefix like "A) ", "B) ", etc.
+      userAnswer = userAnswer.replace(/^[A-Z]\)\s*/, '').trim()
+    }
+    
+    // Strip punctuation from both answers for comparison
+    const stripPunctuation = (str: string) => str.replace(/[.,!?;:]$/g, '').trim()
+    const userAnswerClean = stripPunctuation(userAnswer).toLowerCase()
+    const correctAnswerClean = stripPunctuation(correctAnswer).toLowerCase()
     
     let isCorrect = false
     
     if (question?.question_type === 'multiple_choice' || question?.question_type === 'true_false') {
-      // For multiple choice and true/false, do exact comparison (case insensitive)
-      isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase()
+      // For multiple choice and true/false, do exact comparison (case insensitive, punctuation stripped)
+      isCorrect = userAnswerClean === correctAnswerClean
     } else {
       // For other types, use fuzzy matching
       const userLower = userAnswer.toLowerCase()
@@ -237,16 +248,52 @@ export function QuestionList({ documentId, refreshKey }: QuestionListProps) {
             
             {!isSubmitted ? (
               <div className="space-y-3">
-                <div>
-                  <Label htmlFor="answer-input">Your Answer</Label>
-                  <Textarea
-                    id="answer-input"
-                    value={userAnswer}
-                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                    placeholder="Type your answer here..."
-                    className="mt-2 min-h-24"
-                  />
-                </div>
+                {currentQuestion.question_type === 'fill_blank' ? (
+                  <>
+                    <Label>Fill in the blank(s):</Label>
+                    <div className="text-base leading-relaxed p-3 bg-muted/50 rounded-lg">
+                      {(() => {
+                        let blankIndex = 0
+                        const currentAnswers = userAnswer ? userAnswer.split('|||') : []
+                        
+                        return currentQuestion.question_text.split(/(_+)/).map((part: string, idx: number) => {
+                          // Check if this part is a blank (one or more underscores)
+                          if (/^_+$/.test(part)) {
+                            const currentBlankIndex = blankIndex
+                            blankIndex++
+                            return (
+                              <input
+                                key={idx}
+                                type="text"
+                                value={currentAnswers[currentBlankIndex] || ''}
+                                onChange={(e) => {
+                                  const newAnswers = [...currentAnswers]
+                                  newAnswers[currentBlankIndex] = e.target.value
+                                  handleAnswerChange(currentQuestion.id, newAnswers.join('|||'))
+                                }}
+                                className="inline-block mx-1 px-2 py-1 border-b-2 border-primary focus:outline-none focus:border-primary bg-background min-w-[120px] max-w-[250px]"
+                                placeholder="..."
+                              />
+                            )
+                          }
+                          // Regular text
+                          return <span key={idx}>{part}</span>
+                        })
+                      })()}
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <Label htmlFor="answer-input">Your Answer</Label>
+                    <Textarea
+                      id="answer-input"
+                      value={userAnswer}
+                      onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                      placeholder="Type your answer here..."
+                      className="mt-2 min-h-24"
+                    />
+                  </div>
+                )}
                 <Button
                   variant="default"
                   size="lg"
@@ -413,17 +460,26 @@ export function QuestionList({ documentId, refreshKey }: QuestionListProps) {
                     <>
                       <Label>Select your answer:</Label>
                       <div className="grid grid-cols-1 gap-2">
-                        {q.options.map((option: string, idx: number) => (
-                          <Button
-                            key={idx}
-                            variant={userAnswer === option ? "default" : "outline"}
-                            className="justify-start text-left h-auto py-2 px-3 text-sm whitespace-normal break-words min-h-[40px]"
-                            onClick={() => handleAnswerChange(q.id, option)}
-                          >
-                            <span className="font-semibold mr-2 flex-shrink-0">{String.fromCharCode(65 + idx)}.</span>
-                            <span className="flex-1">{option}</span>
-                          </Button>
-                        ))}
+                        {q.options.map((option: string, idx: number) => {
+                          const optionTrimmed = option.trim()
+                          const isSelected = userAnswer.trim() === optionTrimmed
+                          return (
+                            <Button
+                              key={idx}
+                              type="button"
+                              variant={isSelected ? "default" : "outline"}
+                              className="justify-start text-left h-auto py-2 px-3 text-sm whitespace-normal break-words min-h-[40px]"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                handleAnswerChange(q.id, optionTrimmed)
+                              }}
+                            >
+                              <span className="font-semibold mr-2 flex-shrink-0">{String.fromCharCode(65 + idx)}.</span>
+                              <span className="flex-1">{option}</span>
+                              {isSelected && <Check className="h-4 w-4 ml-2 flex-shrink-0" />}
+                            </Button>
+                          )
+                        })}
                       </div>
                       <Button
                         size="sm"
@@ -461,6 +517,51 @@ export function QuestionList({ documentId, refreshKey }: QuestionListProps) {
                         onClick={() => submitAnswer(q.id)}
                         disabled={!userAnswer.trim()}
                         className="w-full"
+                      >
+                        <Send className="h-3 w-3 mr-2" />
+                        Submit Answer
+                      </Button>
+                    </>
+                  ) : q.question_type === 'fill_blank' ? (
+                    <>
+                      <Label>Fill in the blank(s):</Label>
+                      <div className="text-sm leading-relaxed">
+                        {(() => {
+                          const blanks: string[] = []
+                          let blankIndex = 0
+                          const currentAnswers = userAnswer ? userAnswer.split('|||') : []
+                          
+                          return q.question_text.split(/(_+)/).map((part: string, idx: number) => {
+                            // Check if this part is a blank (one or more underscores)
+                            if (/^_+$/.test(part)) {
+                              const currentBlankIndex = blankIndex
+                              blankIndex++
+                              return (
+                                <input
+                                  key={idx}
+                                  type="text"
+                                  value={currentAnswers[currentBlankIndex] || ''}
+                                  onChange={(e) => {
+                                    const newAnswers = [...currentAnswers]
+                                    newAnswers[currentBlankIndex] = e.target.value
+                                    handleAnswerChange(q.id, newAnswers.join('|||'))
+                                  }}
+                                  className="inline-block mx-1 px-2 py-1 border-b-2 border-primary focus:outline-none focus:border-primary bg-transparent min-w-[100px] max-w-[200px]"
+                                  placeholder="..."
+                                />
+                              )
+                            }
+                            // Regular text
+                            return <span key={idx}>{part}</span>
+                          })
+                        })()}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => submitAnswer(q.id)}
+                        disabled={!userAnswer.trim()}
+                        className="w-full mt-3"
                       >
                         <Send className="h-3 w-3 mr-2" />
                         Submit Answer
