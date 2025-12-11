@@ -456,17 +456,26 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
                         <div className="space-y-2">
                           <p className="text-sm text-muted-foreground">Select your answer:</p>
                           <div className="grid grid-cols-1 gap-2">
-                            {(currentItem as Question).options!.map((option, idx) => (
-                              <Button
-                                key={idx}
-                                variant={selectedOption === option ? "default" : "outline"}
-                                className="justify-start text-left h-auto py-3 px-4 whitespace-normal break-words min-h-[44px]"
-                                onClick={() => setSelectedOption(option)}
-                              >
-                                <span className="font-semibold mr-2 flex-shrink-0">{String.fromCharCode(65 + idx)}.</span>
-                                <span className="flex-1">{option}</span>
-                              </Button>
-                            ))}
+                            {(currentItem as Question).options!.map((option, idx) => {
+                              const optionTrimmed = option.trim()
+                              const isSelected = selectedOption === optionTrimmed
+                              return (
+                                <Button
+                                  key={idx}
+                                  type="button"
+                                  variant={isSelected ? "default" : "outline"}
+                                  className="justify-start text-left h-auto py-3 px-4 whitespace-normal break-words min-h-[44px]"
+                                  onClick={(e) => {
+                                    e.preventDefault()
+                                    setSelectedOption(optionTrimmed)
+                                  }}
+                                >
+                                  <span className="font-semibold mr-2 flex-shrink-0">{String.fromCharCode(65 + idx)}.</span>
+                                  <span className="flex-1">{option}</span>
+                                  {isSelected && <span className="ml-2 text-primary">✓</span>}
+                                </Button>
+                              )
+                            })}
                           </div>
                         </div>
                       )}
@@ -476,17 +485,27 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
                           <p className="text-sm text-muted-foreground">Select your answer:</p>
                           <div className="grid grid-cols-2 gap-2">
                             <Button
+                              type="button"
                               variant={selectedOption === 'True' ? "default" : "outline"}
-                              className="py-6"
-                              onClick={() => setSelectedOption('True')}
+                              className="py-6 text-lg font-semibold"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                setSelectedOption('True')
+                              }}
                             >
+                              {selectedOption === 'True' && <span className="mr-2">✓</span>}
                               True
                             </Button>
                             <Button
+                              type="button"
                               variant={selectedOption === 'False' ? "default" : "outline"}
-                              className="py-6"
-                              onClick={() => setSelectedOption('False')}
+                              className="py-6 text-lg font-semibold"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                setSelectedOption('False')
+                              }}
                             >
+                              {selectedOption === 'False' && <span className="mr-2">✓</span>}
                               False
                             </Button>
                           </div>
@@ -495,14 +514,37 @@ export function CollaborativePracticeSession({ sessionCode }: CollaborativePract
 
                       {(currentItem as Question).question_type === 'fill_blank' && (
                         <div className="space-y-2">
-                          <p className="text-sm text-muted-foreground">Type your answer:</p>
-                          <input
-                            type="text"
-                            value={userAnswer}
-                            onChange={(e) => setUserAnswer(e.target.value)}
-                            placeholder="Your answer..."
-                            className="w-full p-3 rounded-lg border border-input bg-background"
-                          />
+                          <p className="text-sm text-muted-foreground mb-2">Fill in the blank(s):</p>
+                          <div className="text-base leading-relaxed p-4 bg-secondary/50 rounded-lg">
+                            {(() => {
+                              let blankIndex = 0
+                              const currentAnswers = userAnswer ? userAnswer.split('|||') : []
+                              
+                              return (currentItem as Question).question_text.split(/(_+)/).map((part: string, idx: number) => {
+                                // Check if this part is a blank (one or more underscores)
+                                if (/^_+$/.test(part)) {
+                                  const currentBlankIndex = blankIndex
+                                  blankIndex++
+                                  return (
+                                    <input
+                                      key={idx}
+                                      type="text"
+                                      value={currentAnswers[currentBlankIndex] || ''}
+                                      onChange={(e) => {
+                                        const newAnswers = [...currentAnswers]
+                                        newAnswers[currentBlankIndex] = e.target.value
+                                        setUserAnswer(newAnswers.join('|||'))
+                                      }}
+                                      className="inline-block mx-1 px-2 py-1 border-b-2 border-primary focus:outline-none focus:border-primary bg-background min-w-[120px] max-w-[250px]"
+                                      placeholder="..."
+                                    />
+                                  )
+                                }
+                                // Regular text
+                                return <span key={idx}>{part}</span>
+                              })
+                            })()}
+                          </div>
                         </div>
                       )}
 

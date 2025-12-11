@@ -1,13 +1,19 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { DocumentViewerClient } from "@/components/document-viewer-client"
+import { WebDocumentViewerClient } from "@/components/web-document-viewer-client"
+import { getDocumentContent } from "@/app/actions/get-document-content"
+import { isWebDocument } from "@/lib/web-document-helpers"
 
 export default async function DocumentPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ fullscreen?: string }>
 }) {
   const { id } = await params
+  const { fullscreen } = await searchParams
 
   const supabase = await createClient()
 
@@ -34,12 +40,8 @@ export default async function DocumentPage({
     redirect("/auth/verify-email-required")
   }
 
-  const { data: document, error } = await supabase
-    .from("documents")
-    .select("*")
-    .eq("id", id)
-    .eq("user_id", user.id)
-    .single()
+  // Get document content (handles S3 downloads if needed)
+  const { content, document, error } = await getDocumentContent(id)
 
   if (error || !document) {
     return (
@@ -47,7 +49,7 @@ export default async function DocumentPage({
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold">Document Not Found</h1>
           <p className="text-muted-foreground">
-            {error ? `Error: ${error.message}` : "This document doesn't exist or you don't have access to it."}
+            {error || "This document doesn't exist or you don't have access to it."}
           </p>
           <a href="/dashboard" className="text-primary hover:underline">
             Return to Dashboard
@@ -57,7 +59,15 @@ export default async function DocumentPage({
     )
   }
 
+  // Update last accessed timestamp
   await supabase.from("documents").update({ last_accessed: new Date().toISOString() }).eq("id", id)
 
+  // Use separate components: WebDocumentViewerClient for web documents, DocumentViewerClient for PDFs
+  if (isWebDocument(document)) {
+    // Web content - use dedicated web viewer with sidebar
+    return <WebDocumentViewerClient document={document} />
+  }
+
+  // PDF/uploaded documents - use full-featured document viewer with AI tools
   return <DocumentViewerClient document={document} />
 }

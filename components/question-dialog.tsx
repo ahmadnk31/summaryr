@@ -51,16 +51,6 @@ export function QuestionDialog({ open, onOpenChange, documentId, selectedText, d
     }
   }, [open, selectedText, documentText])
 
-  // Auto-generate when dialog opens with autoGenerate flag
-  useEffect(() => {
-    if (open && autoGenerate && inputText && !isGenerating) {
-      const timer = setTimeout(() => {
-        handleGenerate()
-      }, 300)
-      return () => clearTimeout(timer)
-    }
-  }, [open, autoGenerate]) // eslint-disable-line react-hooks/exhaustive-deps
-
   const handleGenerate = async () => {
     if (!inputText.trim()) return
 

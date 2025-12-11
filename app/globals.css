@@ -399,3 +399,149 @@
 @utility slide-out-to-right-full {
   --tw-exit-translate-x: 100%;
 }
+
+/* Print styles for better document printing */
+@media print {
+  /* Hide navigation, buttons, and non-essential UI elements */
+  header,
+  nav,
+  button,
+  .no-print,
+  [role="navigation"],
+  [data-sidebar],
+  aside {
+    display: none !important;
+  }
+
+  /* Ensure content takes full width */
+  main,
+  article,
+  .print-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Remove padding/margin from content area */
+  [class*="CardContent"],
+  [ref="contentRef"],
+  .max-w-none {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Remove all padding and margins from cards */
+  [class*="Card"],
+  [class*="card"],
+  [class*="CardContent"],
+  [class*="CardHeader"] {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Remove spacing from document title area */
+  h1, h2, h3 {
+    margin-top: 0 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Remove extra spacing from content wrapper */
+  div {
+    padding-top: 0 !important;
+  }
+
+  /* Add spacing to the actual content */
+  p {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Add spacing between sections */
+  .space-y-6 > * + *,
+  .space-y-4 > * + * {
+    margin-top: 1rem !important;
+  }
+
+  /* Remove borders and dividers */
+  hr, .border-t {
+    display: none !important;
+  }
+
+  /* Remove shadows and borders for cleaner print */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Ensure text is black for better printing */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Make sure links are underlined and show URLs */
+  a {
+    text-decoration: underline !important;
+  }
+
+  /* Optimize page breaks */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  p, li, blockquote {
+    page-break-inside: avoid;
+  }
+
+  /* Remove unnecessary spacing */
+  .container {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure content starts at the top */
+  body, html {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Remove gap between elements */
+  .space-y-6 > *,
+  .space-y-4 > *,
+  .mb-6,
+  .mb-4,
+  .mt-6,
+  .mt-4,
+  .pt-0 {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Add breathing room to content paragraphs and lists */
+  article p,
+  article ul,
+  article ol,
+  article blockquote,
+  [class*="prose"] p,
+  [class*="prose"] ul,
+  [class*="prose"] ol {
+    margin-top: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* Add space after headings */
+  article h1,
+  article h2,
+  article h3,
+  [class*="prose"] h1,
+  [class*="prose"] h2,
+  [class*="prose"] h3 {
+    margin-top: 1rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+}

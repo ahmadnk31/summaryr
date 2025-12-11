@@ -100,7 +100,7 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
         title={document.title}
       />
 
-      <main className="container mx-auto px-4 py-4 sm:py-6 max-w-7xl">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* Mobile layout - stacked */}
         <div className="block lg:hidden space-y-4 sm:space-y-6">
           <div>
@@ -113,7 +113,7 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
               onCreateNote={handleCreateNote}
             />
           </div>
-          <Card className="h-auto flex flex-col w-full">
+          <Card className="h-auto flex flex-col w-full no-print">
             <CardHeader className="flex-shrink-0">
               <CardTitle className="text-base sm:text-lg">Study Materials</CardTitle>
             </CardHeader>
@@ -236,9 +236,9 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
                 </div>
               </ResizablePanel>
               
-              <ResizableHandle withHandle />
+              <ResizableHandle withHandle className="no-print" />
               
-              <ResizablePanel defaultSize={35} minSize={20} maxSize={60} className="min-w-0">
+              <ResizablePanel defaultSize={35} minSize={20} maxSize={60} className="min-w-0 no-print">
             <Card className="h-full flex flex-col w-full">
               <CardHeader className="flex-shrink-0">
                 <CardTitle className="text-base sm:text-lg">Study Materials</CardTitle>
@@ -372,7 +372,6 @@ export function DocumentViewerClient({ document }: DocumentViewerClientProps) {
         selectedText={selectedText}
         documentText={document.extracted_text || ""}
         onSuccess={handleSuccess}
-        autoGenerate={autoGenerateQuestion}
       />
 
       <SummaryDialog
