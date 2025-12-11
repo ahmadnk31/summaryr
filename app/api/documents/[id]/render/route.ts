@@ -5,6 +5,12 @@ import chromium from '@sparticuz/chromium'
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 
+// Force AWS Lambda environment detection for @sparticuz/chromium
+if (!isDevelopment) {
+  process.env.FONTCONFIG_PATH = '/tmp'
+  process.env.LD_LIBRARY_PATH = '/tmp/swiftshader'
+}
+
 async function generatePDF(html: string): Promise<Buffer> {
   let browser
   
@@ -35,6 +41,9 @@ async function generatePDF(html: string): Promise<Buffer> {
       // Production: use Chromium from @sparticuz/chromium
       // Optimized for Vercel serverless functions
       
+      // Configure chromium for serverless environment
+      chromium.setGraphicsMode = false
+      
       browserConfig = {
         args: [
           ...chromium.args,
@@ -43,9 +52,10 @@ async function generatePDF(html: string): Promise<Buffer> {
           '--no-sandbox',
           '--single-process',
           '--disable-gpu',
+          '--no-zygote',
         ],
         executablePath: await chromium.executablePath(),
-        headless: true,
+        headless: chromium.headless,
       }
       console.log('🔄 Production mode: Using @sparticuz/chromium')
     }
