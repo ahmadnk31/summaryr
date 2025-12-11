@@ -34,9 +34,6 @@ async function generatePDF(html: string): Promise<Buffer> {
     } else {
       // Production: use Chromium from @sparticuz/chromium
       // Set the path to /tmp for Vercel serverless functions
-      await chromium.font(
-        'https://raw.githack.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf'
-      )
       
       browserConfig = {
         args: [
@@ -44,6 +41,8 @@ async function generatePDF(html: string): Promise<Buffer> {
           '--disable-dev-shm-usage',
           '--disable-setuid-sandbox',
           '--no-sandbox',
+          '--single-process',
+          '--disable-gpu',
         ],
         executablePath: await chromium.executablePath('/tmp/chromium'),
         headless: true,
@@ -57,10 +56,10 @@ async function generatePDF(html: string): Promise<Buffer> {
     const page = await browser.newPage()
     
     console.log('📄 Setting HTML content...')
-    // Set content and wait for any async operations
+    // Set content with faster loading for serverless
     await page.setContent(html, { 
-      waitUntil: 'networkidle0',
-      timeout: 30000
+      waitUntil: isDevelopment ? 'networkidle0' : 'domcontentloaded',
+      timeout: isDevelopment ? 30000 : 8000
     })
 
     console.log('🎨 Generating PDF...')
@@ -74,9 +73,7 @@ async function generatePDF(html: string): Promise<Buffer> {
         left: '20mm'
       },
       printBackground: true,
-      displayHeaderFooter: true,
-      headerTemplate: '<div style="font-size: 10px; width: 100%; text-align: center; color: #666;"><span class="date"></span></div>',
-      footerTemplate: '<div style="font-size: 10px; width: 100%; text-align: center; color: #666;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+      displayHeaderFooter: false,
       preferCSSPageSize: false
     })
 
