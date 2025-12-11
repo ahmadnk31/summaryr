@@ -256,39 +256,37 @@ export function EnhancedDocumentRenderer({
   const handleDownloadPDF = async () => {
     setIsLoading(true)
     try {
-      // First try to download the PDF from the server
+      // Download the PDF from the server
       const response = await fetch(`/api/documents/${document.id}/render?format=pdf`)
       
-      if (response.ok) {
-        // If server PDF generation worked, download it
-        const blob = await response.blob()
-        const url = globalThis.window.URL.createObjectURL(blob)
-        const link = globalThis.document.createElement('a')
-        link.href = url
-        link.download = `${document.title || document.file_name || 'document'}.pdf`
-        globalThis.document.body.appendChild(link)
-        link.click()
-        globalThis.document.body.removeChild(link)
-        globalThis.window.URL.revokeObjectURL(url)
-      } else {
-        // If server PDF generation failed, fall back to client-side print
-        console.warn('Server PDF generation failed, opening print dialog')
-        const printWindow = globalThis.window.open(`/api/documents/${document.id}/render?format=html`, '_blank', 'noopener,noreferrer')
-        if (printWindow) {
-          printWindow.onload = () => {
-            printWindow.print()
-          }
-        }
+      if (!response.ok) {
+        // Log the error details
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('PDF generation failed:', errorData)
+        throw new Error(errorData.error || `Server returned ${response.status}`)
       }
+
+      // Server PDF generation worked, download it
+      const blob = await response.blob()
+      
+      // Verify we got a PDF
+      if (blob.type !== 'application/pdf') {
+        console.error('Invalid response type:', blob.type)
+        throw new Error('Server did not return a PDF')
+      }
+
+      const url = globalThis.window.URL.createObjectURL(blob)
+      const link = globalThis.document.createElement('a')
+      link.href = url
+      link.download = `${document.title || document.file_name || 'document'}.pdf`
+      globalThis.document.body.appendChild(link)
+      link.click()
+      globalThis.document.body.removeChild(link)
+      globalThis.window.URL.revokeObjectURL(url)
     } catch (error) {
       console.error('PDF download error:', error)
-      // Fallback to print dialog
-      const printWindow = globalThis.window.open(`/api/documents/${document.id}/render?format=html`, '_blank', 'noopener,noreferrer')
-      if (printWindow) {
-        printWindow.onload = () => {
-          printWindow.print()
-        }
-      }
+      // Show error to user instead of silently opening a new tab
+      alert(`Failed to generate PDF: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`)
     } finally {
       setIsLoading(false)
     }
