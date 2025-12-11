@@ -1,8 +1,0 @@
-{
-  "functions": {
-    "app/api/documents/[id]/render/route.ts": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  }
-}

@@ -256,36 +256,47 @@ export function EnhancedDocumentRenderer({
   const handleDownloadPDF = async () => {
     setIsLoading(true)
     try {
-      // Download the PDF from the server
-      const response = await fetch(`/api/documents/${document.id}/render?format=pdf`)
+      // Fetch the HTML content from the server
+      const response = await fetch(`/api/documents/${document.id}/render?format=html`)
       
       if (!response.ok) {
-        // Log the error details
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-        console.error('PDF generation failed:', errorData)
-        throw new Error(errorData.error || `Server returned ${response.status}`)
+        throw new Error(`Failed to fetch document: ${response.status}`)
       }
 
-      // Server PDF generation worked, download it
-      const blob = await response.blob()
+      const html = await response.text()
       
-      // Verify we got a PDF
-      if (blob.type !== 'application/pdf') {
-        console.error('Invalid response type:', blob.type)
-        throw new Error('Server did not return a PDF')
+      // Open a new window with the HTML content for printing/saving as PDF
+      const printWindow = window.open('', '_blank')
+      if (!printWindow) {
+        throw new Error('Pop-up blocked. Please allow pop-ups and try again.')
       }
-
-      const url = globalThis.window.URL.createObjectURL(blob)
-      const link = globalThis.document.createElement('a')
-      link.href = url
-      link.download = `${document.title || document.file_name || 'document'}.pdf`
-      globalThis.document.body.appendChild(link)
-      link.click()
-      globalThis.document.body.removeChild(link)
-      globalThis.window.URL.revokeObjectURL(url)
+      
+      // Write the HTML content with print-specific styles
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${document.title || document.file_name || 'Document'}</title>
+            <style>
+              @media print {
+                body { margin: 0; padding: 20mm; }
+                @page { margin: 20mm; }
+              }
+            </style>
+          </head>
+          <body>
+            ${html}
+            <script>
+              window.onload = function() {
+                window.print();
+              }
+            </script>
+          </body>
+        </html>
+      `)
+      printWindow.document.close()
     } catch (error) {
       console.error('PDF download error:', error)
-      // Show error to user instead of silently opening a new tab
       alert(`Failed to generate PDF: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`)
     } finally {
       setIsLoading(false)
