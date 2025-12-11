@@ -33,7 +33,7 @@ async function generatePDF(html: string): Promise<Buffer> {
       console.log('🔄 Development mode: Using local Chrome at', chromePath)
     } else {
       // Production: use Chromium from @sparticuz/chromium
-      // Set the path to /tmp for Vercel serverless functions
+      // Optimized for Vercel serverless functions
       
       browserConfig = {
         args: [
@@ -44,7 +44,7 @@ async function generatePDF(html: string): Promise<Buffer> {
           '--single-process',
           '--disable-gpu',
         ],
-        executablePath: await chromium.executablePath('/tmp/chromium'),
+        executablePath: await chromium.executablePath(),
         headless: true,
       }
       console.log('🔄 Production mode: Using @sparticuz/chromium')
