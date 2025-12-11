@@ -118,7 +118,7 @@ async function extractContentWithAI(
   options: ScrapeOptions = {}
 ): Promise<ScrapedContent> {
   const {
-    maxContentLength = 50000,
+    maxContentLength = 5000000,
     includeMetadata = true,
     extractKeyTopics = true,
     summarize = true,
