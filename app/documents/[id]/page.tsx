@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { DocumentViewerClient } from "@/components/document-viewer-client"
-import { EnhancedDocumentRendererClient } from "@/components/enhanced-document-renderer-client"
+import { WebDocumentViewerClient } from "@/components/web-document-viewer-client"
 import { getDocumentContent } from "@/app/actions/get-document-content"
 import { isWebDocument } from "@/lib/web-document-helpers"
 
@@ -62,35 +62,10 @@ export default async function DocumentPage({
   // Update last accessed timestamp
   await supabase.from("documents").update({ last_accessed: new Date().toISOString() }).eq("id", id)
 
-  // Use separate components: EnhancedDocumentRenderer for web documents, DocumentViewerClient for PDFs
+  // Use separate components: WebDocumentViewerClient for web documents, DocumentViewerClient for PDFs
   if (isWebDocument(document)) {
-    // Web content - use dedicated web renderer with markdown support
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-semibold truncate">{document.title}</h1>
-              <p className="text-sm text-muted-foreground">
-                Web Content • {new Date(document.upload_date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <a
-                href="/documents"
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
-              >
-                Back to Documents
-              </a>
-            </div>
-          </div>
-        </div>
-        
-        <main className="container mx-auto px-4 py-6 max-w-4xl">
-          <EnhancedDocumentRendererClient document={document} />
-        </main>
-      </div>
-    )
+    // Web content - use dedicated web viewer with sidebar
+    return <WebDocumentViewerClient document={document} />
   }
 
   // PDF/uploaded documents - use full-featured document viewer with AI tools

@@ -294,13 +294,9 @@ export function EnhancedDocumentRenderer({
     }
   }
 
-  const handlePrint = async () => {
-    const printWindow = window.open(`/api/documents/${document.id}/render?format=html`, '_blank', 'noopener,noreferrer')
-    if (printWindow) {
-      printWindow.onload = () => {
-        printWindow.print()
-      }
-    }
+  const handlePrint = () => {
+    // Print the current page directly without opening a new tab
+    window.print()
   }
 
   // Parse content into sections while preserving markdown structure
@@ -489,7 +485,7 @@ export function EnhancedDocumentRenderer({
         </div>
       </CardHeader>
 
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 max-h-[calc(100vh-16rem)] overflow-y-scroll">
         <div className="border-t mb-6" />
         
         {/* Rendered content */}
