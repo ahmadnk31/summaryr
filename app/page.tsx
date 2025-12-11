@@ -221,6 +221,18 @@ export default async function LandingPage() {
         </AnimatedSection>
       </div>
 
+      {/* Product Hunt badge */}
+      <div className="flex justify-center mt-8 mb-4">
+        <a href="https://www.producthunt.com/products/summaryr?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-summaryr" target="_blank" rel="noopener noreferrer">
+          <img
+            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1049133&theme=light&t=1765466653602"
+            alt="Summaryr - AI-Powered Document–Instant Summaries, Flashcards & Quizzes | Product Hunt"
+            style={{ width: '250px', height: '54px' }}
+            width={250}
+            height={54}
+          />
+        </a>
+      </div>
       <FooterSection />
     </div>
   )
