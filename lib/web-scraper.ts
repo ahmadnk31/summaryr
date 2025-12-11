@@ -118,7 +118,7 @@ async function extractContentWithAI(
   options: ScrapeOptions = {}
 ): Promise<ScrapedContent> {
   const {
-    maxContentLength = 10000,
+    maxContentLength = 50000,
     includeMetadata = true,
     extractKeyTopics = true,
     summarize = true,
@@ -126,57 +126,70 @@ async function extractContentWithAI(
   } = options
 
   try {
+    // Pre-process HTML to remove obvious non-content and reduce size
+    const cleanedHtml = html
+      // Remove script and style tags
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      // Remove comments
+      .replace(/<!--[\s\S]*?-->/g, '')
+      // Remove SVG content
+      .replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '')
+      // Remove nav, footer, header (usually navigation)
+      .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+      .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+      // Remove hidden elements
+      .replace(/<[^>]+hidden[^>]*>[\s\S]*?<\/[^>]+>/gi, '')
+      // Remove common ad/tracking elements
+      .replace(/<div[^>]*(?:ad-|ads-|advertisement|tracking|cookie|banner)[^>]*>[\s\S]*?<\/div>/gi, '')
+      // Normalize whitespace
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    console.log(`📄 Cleaned HTML size: ${cleanedHtml.length} (original: ${html.length})`)
+
     const prompt = `
-You are an expert web content extractor. Your task is to analyze the provided HTML and extract ALL meaningful content from the page.
+You are an expert web content extractor. Your task is to extract ALL meaningful content from the provided HTML.
 
 URL: ${url}
 
-Instructions:
-1. Extract ALL main textual content - do not truncate or limit the content significantly
-2. Remove only true non-content elements (navigation menus, ads, footers, cookie banners, sidebars with just links)
-3. PRESERVE all article content, body text, headings, lists, important sections
-4. Include content from multiple sections if they contain valuable information
-5. Maintain paragraph structure and important formatting cues
-6. Identify the content type (article, documentation, blog, news, academic, general)
-7. Extract metadata like author, published date, description if available
-8. ${extractKeyTopics ? 'Generate 8-15 key topics/keywords that represent all main themes' : 'Skip key topics extraction'}
-9. ${summarize ? 'Create a comprehensive summary (3-5 sentences) covering all major points' : 'Skip summary generation'}
-10. Clean up HTML tags but preserve text structure and readability
-11. Do NOT artificially limit content to ${maxContentLength} characters - extract everything important
+CRITICAL INSTRUCTIONS:
+1. Extract EVERYTHING that is actual content - articles, documentation, tutorials, code examples, etc.
+2. Do NOT truncate or summarize the main content - preserve it completely
+3. Remove only: navigation menus, advertisements, cookie banners, sidebar links, footer links
+4. KEEP: All paragraphs, all headings, all lists, all code blocks, all important text
+5. Preserve the logical structure with headings and sections
+6. For documentation/tutorial pages: include ALL code examples and explanations
+7. For articles: include the complete article text
+8. Extract metadata if available (author, date, description)
+9. ${extractKeyTopics ? 'Identify 8-15 key topics covering all main themes' : 'Skip topics'}
+10. ${summarize ? 'Create a comprehensive 3-5 sentence summary' : 'Skip summary'}
 
-HTML Content:
-${html.substring(0, 100000)} ${html.length > 100000 ? '...[truncated for processing]' : ''}
+HTML Content (cleaned):
+${cleanedHtml.substring(0, 150000)}
 
-CRITICAL: Extract as much meaningful content as possible. This is for study purposes, so comprehensive content is essential.
-
-Please respond with a JSON object in this exact format:
+Respond with a JSON object:
 {
-  "title": "Extracted page title",
-  "content": "COMPREHENSIVE main textual content with ALL important information",
-  "summary": "Comprehensive 3-5 sentence summary covering all major points",
-  "keyTopics": ["topic1", "topic2", "topic3", "topic4", "topic5", "topic6", "topic7", "topic8"],
+  "title": "Page title",
+  "content": "COMPLETE extracted content - do not truncate",
+  "summary": "3-5 sentence summary",
+  "keyTopics": ["topic1", "topic2", ...],
   "contentType": "article|documentation|blog|news|academic|general",
   "metadata": {
-    "author": "Author name if found",
-    "publishedDate": "Publication date if found",
-    "description": "Meta description if found",
-    "language": "Content language (e.g., 'en')"
+    "author": "Author if found or null",
+    "publishedDate": "Date if found or null",
+    "description": "Meta description or null",
+    "language": "en"
   }
 }
 
-Important:
-- Ensure the JSON is valid and properly escaped
-- If information is not available, use null for strings or empty array for arrays
-- Preserve ALL meaningful content, headings, and important text
-- Remove HTML tags and clean up formatting
-- Focus on comprehensive extraction, not brevity
-- Include content from all important sections of the page
+IMPORTANT: The content field should contain ALL the main text from the page. Do not limit or truncate it.
 `
 
     const result = await generateText({
-      model: openai('gpt-4o-mini'), // Using cost-effective model for web scraping
+      model: openai('gpt-4o'), // Using more capable model for comprehensive extraction
       prompt,
-      temperature: 0.1, // Low temperature for consistent extraction
+      temperature: 0.1,
     })
 
     // Parse the AI response
