@@ -6,7 +6,7 @@ import { DocumentUploadS3 } from "./document-upload-s3"
 import { WebScraper } from "./web-scraper"
 import { Upload, Globe } from "lucide-react"
 
-export function UnifiedUpload() {
+export function UnifiedUpload({ planTier = 'free', documentCount = 0 }: { planTier?: string; documentCount?: number }) {
   const [activeTab, setActiveTab] = useState("file")
 
   return (
@@ -17,16 +17,16 @@ export function UnifiedUpload() {
             <Upload className="h-4 w-4" />
             Upload File
           </TabsTrigger>
-          <TabsTrigger value="web" className="flex items-center gap-2">
+          <TabsTrigger value="web" className="flex items-center gap-2" disabled={planTier === 'free'} title={planTier === 'free' ? "Upgrade to Pro to scrape web pages" : ""}>
             <Globe className="h-4 w-4" />
-            Scrape Web Page
+            Scrape Web Page {planTier === 'free' && <span className="ml-2 text-xs bg-muted text-primary px-1.5 py-0.5 rounded-full">Pro</span>}
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="file" className="mt-6">
-          <DocumentUploadS3 />
+          <DocumentUploadS3 planTier={planTier} documentCount={documentCount} />
         </TabsContent>
-        
+
         <TabsContent value="web" className="mt-6">
           <WebScraper />
         </TabsContent>

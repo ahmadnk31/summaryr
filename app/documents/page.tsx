@@ -51,12 +51,22 @@ export default async function DocumentsPage() {
     console.error("Error fetching documents:", documentsError)
   }
 
+  // Fetch user profile for plan tier
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan_tier")
+    .eq("id", user.id)
+    .single()
+
+  const planTier = profile?.plan_tier || 'free'
+
   return (
     <div className="min-h-screen bg-background">
-      <DashboardNavbar 
-        showBackButton 
-        backHref="/dashboard" 
+      <DashboardNavbar
+        showBackButton
+        backHref="/dashboard"
         title="My Documents"
+        planTier={planTier}
       />
 
       <main className="container mx-auto px-4 py-8">

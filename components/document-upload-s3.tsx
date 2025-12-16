@@ -13,7 +13,12 @@ import { processDocument } from "@/app/actions/process-document-s3"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
-export function DocumentUploadS3() {
+interface DocumentUploadS3Props {
+  planTier?: string
+  documentCount?: number
+}
+
+export function DocumentUploadS3({ planTier = 'free', documentCount = 0 }: DocumentUploadS3Props) {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -21,8 +26,15 @@ export function DocumentUploadS3() {
   const [url, setUrl] = useState("")
   const router = useRouter()
 
+  const isLimitReached = planTier === 'free' && documentCount >= 5
+
   const handleFileUpload = useCallback(
     async (file: File) => {
+      if (isLimitReached) {
+        setError("Free plan limit reached (5 documents). Please upgrade to upload more.")
+        return
+      }
+
       const fileType = file.name.split(".").pop()?.toLowerCase()
       if (!["pdf", "docx", "epub"].includes(fileType || "")) {
         setError("Please upload a PDF, DOCX, or EPUB file")
@@ -90,7 +102,7 @@ export function DocumentUploadS3() {
           console.log("⚠️  S3 upload failed or not configured:", uploadResponse.status, errorData)
           console.log("📦 Falling back to Supabase Storage")
           const filePath = `${user.id}/${timestamp}-${file.name}`
-          
+
           const { error: uploadError } = await supabase.storage
             .from("documents")
             .upload(filePath, file, {
@@ -219,21 +231,29 @@ export function DocumentUploadS3() {
             isDragActive
               ? "border-primary bg-primary/5"
               : "border-muted-foreground/25 hover:border-primary/50 hover:bg-accent/50",
-            isUploading && "opacity-50 cursor-not-allowed"
+            isUploading && "opacity-50 cursor-not-allowed",
+            isLimitReached && "opacity-75 cursor-not-allowed border-destructive/50 bg-destructive/5"
           )}
         >
-          <input {...getInputProps()} />
+          <input {...getInputProps()} disabled={isLimitReached} />
 
           <div className="rounded-full bg-primary/10 p-4">
             {isUploading ? (
               <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            ) : isLimitReached ? (
+              <Loader2 className="h-8 w-8 text-muted-foreground" /> // Or a lock icon
             ) : (
               <Upload className="h-8 w-8 text-primary" />
             )}
           </div>
 
           <div className="text-center">
-            {isUploading ? (
+            {isLimitReached ? (
+              <>
+                <p className="text-sm font-medium mb-1 text-destructive">Upload limit reached</p>
+                <p className="text-xs text-muted-foreground">Free plan is limited to 5 documents</p>
+              </>
+            ) : isUploading ? (
               <>
                 <p className="text-sm font-medium mb-1">
                   {uploadProgress < 60 ? "Uploading..." : "Processing document..."}
@@ -302,7 +322,7 @@ export function DocumentUploadS3() {
           )}
         </div>
 
-        
+
       </CardContent>
     </Card>
   )
