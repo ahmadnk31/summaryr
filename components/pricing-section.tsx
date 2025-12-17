@@ -28,7 +28,7 @@ export function PricingSection() {
     {
       name: "Pro",
       price: { monthly: 10, annually: 8.33 }, // 100 / 12 ~ 8.33
-      displayPrice: { monthly: "€10", annually: "€100" }, // explicit display values
+      displayPrice: { monthly: "€10", annually: "€50" }, // explicit display values
       description: "For students and professionals.",
       features: [
         "Unlimited document uploads",
@@ -43,7 +43,7 @@ export function PricingSection() {
     {
       name: "Team",
       price: { monthly: 15, annually: 12.50 }, // 150 / 12 = 12.50
-      displayPrice: { monthly: "€15", annually: "€150" },
+      displayPrice: { monthly: "€15", annually: "€100" },
       description: "For simplified collaboration.",
       features: [
         "Everything in Pro",
