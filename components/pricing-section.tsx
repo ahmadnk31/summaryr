@@ -17,40 +17,42 @@ export function PricingSection() {
       price: { monthly: 0, annually: 0 },
       description: "Perfect for getting started.",
       features: [
-        "Upload up to 3 documents",
-        "50 AI generations per month",
-        "Basic summaries & flashcards",
-        "Limited document chat",
+        "Upload up to 5 documents",
+        "Basic text extraction",
+        "No web scraping",
+        "Community support",
       ],
       cta: "Start for Free",
       href: "/auth/sign-up",
     },
     {
       name: "Pro",
-      price: { monthly: 15, annually: 12 },
+      price: { monthly: 10, annually: 8.33 }, // 100 / 12 ~ 8.33
+      displayPrice: { monthly: "€10", annually: "€100" }, // explicit display values
       description: "For students and professionals.",
       features: [
         "Unlimited document uploads",
-        "Unlimited AI generations",
-        "Advanced study tools",
-        "Priority support",
+        "Priority processing",
+        "Web scraping enabled",
+        "Email support",
       ],
       cta: "Upgrade to Pro",
-      href: "/auth/sign-up",
+      href: "/pricing?plan=pro",
       popular: true,
     },
     {
       name: "Team",
-      price: { monthly: 50, annually: 40 },
-      description: "For groups and institutions.",
+      price: { monthly: 15, annually: 12.50 }, // 150 / 12 = 12.50
+      displayPrice: { monthly: "€15", annually: "€150" },
+      description: "For simplified collaboration.",
       features: [
         "Everything in Pro",
-        "Team collaboration features",
-        "Shared document library",
-        "Admin dashboard",
+        "Real-time collaboration",
+        "Team management",
+        "Dedicated support",
       ],
-      cta: "Contact Sales",
-      href: "#contact",
+      cta: "Upgrade to Team",
+      href: "/pricing?plan=team",
     },
   ]
 
@@ -74,9 +76,22 @@ export function PricingSection() {
         <p className="mt-2 text-muted-foreground">{plan.description}</p>
         <div className="mt-6">
           <span className="text-4xl font-bold">
-            €{isAnnual ? plan.price.annually : plan.price.monthly}
+            {isAnnual && plan.displayPrice ? (
+              // Show effective monthly cost or total yearly? Usually marketing shows "per month, billed annually"
+              // But here let's stick to the convention. 
+              // If we want to show "€8.33/mo", we use the calculated value.
+              // Let's explicitly show the formatted value if it exists, otherwise fallback
+              "€" + plan.price.annually
+            ) : (
+              "€" + plan.price.monthly
+            )}
           </span>
           <span className="text-muted-foreground">/month</span>
+          {isAnnual && plan.displayPrice && (
+            <div className="text-sm text-muted-foreground mt-1">
+              Billed {plan.displayPrice.annually} yearly
+            </div>
+          )}
         </div>
         <ul className="mt-6 space-y-3">
           {plan.features.map((feature) => (
@@ -113,11 +128,11 @@ export function PricingSection() {
 
         <div className="flex justify-center items-center gap-4 mb-12">
           <span className={`font-medium ${isAnnual ? 'text-muted-foreground' : 'text-foreground'}`}>Monthly</span>
-          <div 
+          <div
             className="relative w-14 h-8 bg-muted rounded-full cursor-pointer p-1"
             onClick={() => setIsAnnual(!isAnnual)}
           >
-            <motion.div 
+            <motion.div
               className="w-6 h-6 bg-primary rounded-full"
               layout
               transition={{ type: "spring", stiffness: 700, damping: 30 }}
@@ -129,7 +144,7 @@ export function PricingSection() {
             />
           </div>
           <span className={`font-medium ${isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>Annually</span>
-          <div className="bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded-full">SAVE 20%</div>
+          <div className="bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded-full">SAVE UP TO 20%</div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -141,3 +156,4 @@ export function PricingSection() {
     </section>
   )
 }
+

@@ -59,7 +59,7 @@ const plans = [
         ],
         monthly: {
             price: "€15",
-            priceId: "price_1SevRxCwfSQS5OH3XXqXXkro",
+            priceId: "price_1SexnNCwfSQS5OH3puCc1rdz",
         },
         yearly: {
             price: "€150",

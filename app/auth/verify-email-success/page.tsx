@@ -5,7 +5,14 @@ import { CheckCircle2 } from "lucide-react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 
-export default async function VerifyEmailSuccessPage() {
+export default async function VerifyEmailSuccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const { next } = await searchParams
+  const nextUrl = typeof next === "string" ? next : "/dashboard"
+
   // Check if user is authenticated and verified, redirect to dashboard
   const supabase = await createClient()
   const {
@@ -22,9 +29,9 @@ export default async function VerifyEmailSuccessPage() {
       .limit(1)
       .maybeSingle()
 
-    // If verified, redirect to dashboard
+    // If verified, redirect to dashboard or next url
     if (verification?.verified === true) {
-      redirect("/dashboard")
+      redirect(nextUrl)
     }
   }
 
@@ -44,7 +51,7 @@ export default async function VerifyEmailSuccessPage() {
               Thank you for verifying your email address. Your account is now active and you can sign in.
             </p>
             <Button asChild className="w-full">
-              <Link href="/auth/login">Sign In</Link>
+              <Link href={nextUrl !== "/dashboard" ? `/auth/login?next=${encodeURIComponent(nextUrl)}` : "/auth/login"}>Sign In</Link>
             </Button>
           </CardContent>
         </Card>

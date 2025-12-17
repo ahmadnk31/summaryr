@@ -30,7 +30,9 @@ export default async function ProfilePage() {
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
 
-    const planTier = profile?.plan_tier || "free"
+    // Fetch effective plan tier
+    const { data: effectivePlanTier } = await supabase.rpc("get_user_plan_tier", { user_uuid: user.id })
+    const planTier = effectivePlanTier || profile?.plan_tier || "free"
     const uploadLimit = planTier === "free" ? 5 : "Unlimited"
 
     return (
@@ -39,6 +41,7 @@ export default async function ProfilePage() {
             <main className="container mx-auto px-4">
                 <ProfileView
                     user={{
+                        id: user.id,
                         email: user.email,
                         full_name: profile?.full_name
                     }}

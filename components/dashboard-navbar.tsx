@@ -126,7 +126,7 @@ export function DashboardNavbar({
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative h-8 w-8 rounded-full border bg-muted">
+                    <Button variant="ghost" size="icon" className="relative h-8 w-8 rounded-full border bg-muted" suppressHydrationWarning>
                       <User className="h-4 w-4" />
                       <span className="sr-only">User menu</span>
                     </Button>

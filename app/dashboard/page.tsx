@@ -84,7 +84,8 @@ export default async function DashboardPage() {
     .single()
 
   const userName = profile?.full_name || user.email?.split("@")[0] || "User"
-  const planTier = profile?.plan_tier || 'free'
+  const { data: effectivePlanTier } = await supabase.rpc("get_user_plan_tier", { user_uuid: user.id })
+  const planTier = effectivePlanTier || profile?.plan_tier || 'free'
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
