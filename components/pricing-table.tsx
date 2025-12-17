@@ -39,11 +39,13 @@ const plans = [
         ],
         monthly: {
             price: "€10",
-            priceId: "price_1Sevb3CwfSQS5OH3kCCl3nu9",
+            priceId:
+                "price_1SfJXLGngVmqUcIpiHupGsxl",
         },
         yearly: {
-            price: "€100",
-            priceId: "price_YEARLY_PRO_PLACEHOLDER", // REPLACE WITH REAL ID
+            price: "€50",
+            priceId:
+                "price_1SfJYoGngVmqUcIpc3MMciqk", // REPLACE WITH REAL ID
         },
         buttonText: "Upgrade to Pro",
         disabled: false,
@@ -59,11 +61,12 @@ const plans = [
         ],
         monthly: {
             price: "€15",
-            priceId: "price_1SexnNCwfSQS5OH3puCc1rdz",
+            priceId:
+                "price_1SfJadGngVmqUcIpyqgTAdY3",
         },
         yearly: {
-            price: "€150",
-            priceId: "price_YEARLY_TEAM_PLACEHOLDER", // REPLACE WITH REAL ID
+            price: "€100",
+            priceId: "price_1SfJbkGngVmqUcIpBuqj2DN7", // REPLACE WITH REAL ID
         },
         buttonText: "Upgrade to Team",
         disabled: false,
