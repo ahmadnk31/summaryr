@@ -8,7 +8,8 @@
 export function getBaseUrl(): string {
   // First priority: explicit NEXT_PUBLIC_APP_URL
   if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL
+    const url = process.env.NEXT_PUBLIC_APP_URL.trim()
+    return url.startsWith('http') ? url : `https://${url}`
   }
 
   // Second priority: Vercel URL

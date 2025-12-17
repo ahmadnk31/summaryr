@@ -13,22 +13,29 @@ import {
 interface WelcomeEmailProps {
   name: string
   dashboardUrl: string
+  planName?: string
 }
 
-export function WelcomeEmail({ name, dashboardUrl }: WelcomeEmailProps) {
+export function WelcomeEmail({ name, dashboardUrl, planName = "Pro" }: WelcomeEmailProps) {
+  const isTeam = planName.toLowerCase() === "team"
+  const formattedPlan = planName.charAt(0).toUpperCase() + planName.slice(1)
+
   return (
     <Html>
       <Head />
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>Welcome to Summaryr!</Heading>
+          <Heading style={h1}>Welcome to Summaryr {formattedPlan}!</Heading>
           <Section style={section}>
             <Text style={text}>Hi {name},</Text>
             <Text style={text}>
-              Thank you for verifying your email address. Your account is now active and ready to use!
+              Thank you for subscribing to the {formattedPlan} plan. Your account is now active and ready to use!
             </Text>
             <Text style={text}>
-              Get started by uploading your first document and transforming it into study materials with AI.
+              {isTeam
+                ? "Get started by creating your organization and inviting your team members."
+                : "Get started by uploading your first document and transforming it into study materials with AI."
+              }
             </Text>
           </Section>
           <Section style={buttonSection}>
@@ -49,7 +56,7 @@ export function WelcomeEmail({ name, dashboardUrl }: WelcomeEmailProps) {
           </Section>
           <Section style={section}>
             <Text style={smallText}>
-              If you have any questions, feel free to reach out to our support team. We're here to help!
+              If you have any questions, feel free to reach out to our support team at <Link href="mailto:support@summaryr.com" style={link}>support@summaryr.com</Link>. We're here to help!
             </Text>
             <Text style={smallText}>
               Happy studying!<br />
@@ -133,5 +140,10 @@ const list = {
 
 const listItem = {
   margin: "8px 0",
+}
+
+const link = {
+  color: "#0070f3",
+  textDecoration: "underline",
 }
 

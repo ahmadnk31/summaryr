@@ -8,10 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
 
-export default function Page() {
+function SignUpForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [fullName, setFullName] = useState("")
@@ -20,22 +20,24 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nextUrl = searchParams.get("next") || "/dashboard"
 
   // Check if user is already authenticated and redirect to dashboard
   useEffect(() => {
     const checkAuth = async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      
+
       if (user) {
-        router.push("/dashboard")
+        router.push(nextUrl)
       } else {
         setIsCheckingAuth(false)
       }
     }
-    
+
     checkAuth()
-  }, [router])
+  }, [router, nextUrl])
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,15 +57,15 @@ export default function Page() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/verify-email-success`,
+          emailRedirectTo: `${window.location.origin}/auth/verify-email-success?next=${encodeURIComponent(nextUrl)}`,
           data: {
             full_name: fullName,
           },
         },
       })
-      
+
       if (signUpError) throw signUpError
-      
+
       if (!signUpData.user) {
         throw new Error("User creation failed")
       }
@@ -75,9 +77,9 @@ export default function Page() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             userId: signUpData.user.id,
-            email: signUpData.user.email 
+            email: signUpData.user.email
           }),
         })
 
@@ -95,7 +97,10 @@ export default function Page() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({
+            email,
+            next: nextUrl
+          }),
         })
 
         if (!verificationResponse.ok) {
@@ -113,7 +118,7 @@ export default function Page() {
         localStorage.setItem("signup_email", email)
       }
 
-      router.push(`/auth/sign-up-success?email=${encodeURIComponent(email)}`)
+      router.push(`/auth/sign-up-success?email=${encodeURIComponent(email)}&next=${encodeURIComponent(nextUrl)}`)
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
@@ -197,7 +202,7 @@ export default function Page() {
               </div>
               <div className="mt-4 text-center text-sm">
                 Already have an account?{" "}
-                <Link href="/auth/login" className="underline underline-offset-4">
+                <Link href={nextUrl !== "/dashboard" ? `/auth/login?next=${encodeURIComponent(nextUrl)}` : "/auth/login"} className="underline underline-offset-4">
                   Login
                 </Link>
               </div>
@@ -206,5 +211,13 @@ export default function Page() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense>
+      <SignUpForm />
+    </Suspense>
   )
 }

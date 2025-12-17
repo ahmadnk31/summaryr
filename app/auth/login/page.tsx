@@ -8,32 +8,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
 
-export default function Page() {
+function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nextUrl = searchParams.get("next") || "/dashboard"
 
-  // Check if user is already authenticated and redirect to dashboard
+  // Check if user is already authenticated and redirect
   useEffect(() => {
     const checkAuth = async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      
+
       if (user) {
-        router.push("/dashboard")
+        router.push(nextUrl)
       } else {
         setIsCheckingAuth(false)
       }
     }
-    
+
     checkAuth()
-  }, [router])
+  }, [router, nextUrl])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,7 +50,7 @@ export default function Page() {
       })
 
       if (error) throw error
-      
+
       // Check if email is verified - redirect to verification page if not verified
       if (data.user && !data.user.email_confirmed_at) {
         // Resend verification email
@@ -65,10 +67,10 @@ export default function Page() {
         router.push("/auth/verify-email-required")
         return
       }
-      
-      // Only redirect to dashboard if email is verified
+
+      // Only redirect if email is verified
       if (data.user?.email_confirmed_at) {
-        router.push("/dashboard")
+        router.push(nextUrl)
       } else {
         router.push("/auth/verify-email-required")
       }
@@ -134,7 +136,7 @@ export default function Page() {
               </div>
               <div className="mt-4 text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <Link href="/auth/sign-up" className="underline underline-offset-4">
+                <Link href={nextUrl !== "/dashboard" ? `/auth/sign-up?next=${encodeURIComponent(nextUrl)}` : "/auth/sign-up"} className="underline underline-offset-4">
                   Sign up
                 </Link>
               </div>
@@ -143,5 +145,13 @@ export default function Page() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }
