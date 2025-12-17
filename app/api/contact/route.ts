@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 import { render } from "@react-email/render"
 import { ContactEmail } from "@/emails/contact-email"
+import { createClient } from "@/lib/supabase/server"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -47,6 +48,23 @@ export async function POST(request: NextRequest) {
     const fromEmailRaw = process.env.RESEND_FROM_EMAIL || process.env.FROM_EMAIL || contactEmail
     const fromEmail = fromEmailRaw.includes("<") ? fromEmailRaw : `Summaryr <${fromEmailRaw}>`
     const contactFromEmail = `Summaryr Contact <${contactEmail}>`
+
+    // Insert into database
+    const supabase = await createClient()
+    const { error: dbError } = await supabase
+      .from("contacts")
+      .insert({
+        name,
+        email,
+        subject,
+        message,
+        status: 'new'
+      })
+
+    if (dbError) {
+      console.error("Error saving contact to DB:", dbError)
+      // We don't block email sending if DB fails, but good to know
+    }
 
     // Send email to the company (internal notification)
     const { data: companyEmailData, error: companyEmailError } = await resend.emails.send({

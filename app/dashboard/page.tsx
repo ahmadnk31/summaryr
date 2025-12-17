@@ -76,20 +76,21 @@ export default async function DashboardPage() {
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id)
 
-  // Get user's full name and plan tier
+  // Get user's full name and plan tier and admin status
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, plan_tier")
+    .select("full_name, plan_tier, is_admin")
     .eq("id", user.id)
     .single()
 
   const userName = profile?.full_name || user.email?.split("@")[0] || "User"
   const { data: effectivePlanTier } = await supabase.rpc("get_user_plan_tier", { user_uuid: user.id })
   const planTier = effectivePlanTier || profile?.plan_tier || 'free'
+  const isAdmin = profile?.is_admin || false
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <DashboardNavbar userName={userName} planTier={planTier} />
+      <DashboardNavbar userName={userName} planTier={planTier} isAdmin={isAdmin} />
 
       <main className="container mx-auto px-4 py-4 sm:py-8 max-w-7xl">
         <div className="mb-4 sm:mb-8">

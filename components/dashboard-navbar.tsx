@@ -21,6 +21,7 @@ interface DashboardNavbarProps {
   rightAction?: React.ReactNode
   userName?: string
   planTier?: string
+  isAdmin?: boolean
 }
 
 export function DashboardNavbar({
@@ -30,6 +31,7 @@ export function DashboardNavbar({
   rightAction,
   userName,
   planTier = 'free',
+  isAdmin = false,
 }: DashboardNavbarProps) {
   const pathname = usePathname()
   const isDashboard = pathname === "/dashboard"
@@ -134,10 +136,14 @@ export function DashboardNavbar({
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <Link href="/dashboard/profile" className="cursor-pointer flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile & Billing</span>
+                    </Link>
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard/profile" className="cursor-pointer flex items-center">
+                      <Link href="/admin/contacts" className="cursor-pointer flex items-center">
                         <User className="mr-2 h-4 w-4" />
-                        <span>Profile & Billing</span>
+                        <span>Admin Panel</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -154,9 +160,9 @@ export function DashboardNavbar({
               </>
             )}
           </div>
-        </div>
-      </div>
-    </header>
+        </div >
+      </div >
+    </header >
   )
 }
 

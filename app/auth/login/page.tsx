@@ -128,6 +128,11 @@ function LoginForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
+                  <div className="flex justify-end">
+                    <Link href="/auth/forgot-password" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+                      Forgot password?
+                    </Link>
+                  </div>
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <Button type="submit" className="w-full" disabled={isLoading}>
