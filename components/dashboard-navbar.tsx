@@ -136,16 +136,23 @@ export function DashboardNavbar({
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <Link href="/dashboard/profile" className="cursor-pointer flex items-center">
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile & Billing</span>
-                    </Link>
                     <DropdownMenuItem asChild>
-                      <Link href="/admin/contacts" className="cursor-pointer flex items-center">
+                      <Link href="/dashboard/profile" className="cursor-pointer flex items-center">
                         <User className="mr-2 h-4 w-4" />
-                        <span>Admin Panel</span>
+                        <span>Profile & Billing</span>
                       </Link>
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin/contacts" className="cursor-pointer flex items-center">
+                            <span className="mr-2">🛡️</span>
+                            <span>Admin Panel</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <form action="/auth/signout" method="post" className="w-full">

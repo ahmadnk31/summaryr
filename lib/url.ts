@@ -9,6 +9,9 @@ export function getBaseUrl(): string {
   // First priority: explicit NEXT_PUBLIC_APP_URL
   if (process.env.NEXT_PUBLIC_APP_URL) {
     const url = process.env.NEXT_PUBLIC_APP_URL.trim()
+    if (url.includes('localhost')) {
+      return url.startsWith('http') ? url : `http://${url}`
+    }
     return url.startsWith('http') ? url : `https://${url}`
   }
 

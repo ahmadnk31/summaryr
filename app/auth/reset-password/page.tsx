@@ -7,16 +7,23 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { updatePassword } from "@/app/actions/auth-actions"
 import { toast } from "sonner"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 export default function ResetPasswordPage() {
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
     const [loading, setLoading] = useState(false)
+    const searchParams = useSearchParams()
+    const token = searchParams.get("token")
     const router = useRouter()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        if (!token) {
+            toast.error("Invalid reset link")
+            return
+        }
 
         if (password !== confirmPassword) {
             toast.error("Passwords do not match")
@@ -25,7 +32,7 @@ export default function ResetPasswordPage() {
 
         setLoading(true)
 
-        const result = await updatePassword(password)
+        const result = await updatePassword(token, password)
 
         if (result.success) {
             toast.success("Password updated successfully")
