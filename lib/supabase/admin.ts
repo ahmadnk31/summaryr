@@ -2,11 +2,13 @@ import { createClient } from "@supabase/supabase-js"
 
 // Admin client for server-side operations that require elevated privileges
 export function createAdminClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (!supabaseServiceKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set")
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error(
+      'Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in your .env.local file.'
+    )
   }
 
   return createClient(supabaseUrl, supabaseServiceKey, {
